@@ -1,0 +1,4 @@
+{
+    "dockerhub-id": "LauraDiao/Methodology5:latest",
+    "build-script": "run.py"
+}
