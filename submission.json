@@ -1,4 +1,4 @@
 {
-    "dockerhub-id": "LauraDiao/Methodology5:latest",
+    "dockerhub-id": "lauradiao/m5image2:latest",
     "build-script": "run.py"
 }
