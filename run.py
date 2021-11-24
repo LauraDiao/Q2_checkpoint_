@@ -28,6 +28,7 @@ def main(targets):
     if 'test' in targets:
         transformed_data = gen(**transform_config)
         combs = getAllCombinations(**columns)
+        
         results = test_mse(combs, transformed_data)
         best = best_performance(results)
         print("Found best performances: {}".format(best))

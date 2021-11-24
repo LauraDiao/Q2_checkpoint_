@@ -84,5 +84,9 @@ def gen(runs):
         dfs.append(readfilerun(i))
 
     combined = pd.concat(dfs , ignore_index=True)#.reset_index(drop = True)
+
+    path = os.path.join(os.getcwd() , "outputs")
     #combined.to_csv("combined_latency.csv")
+    combined.to_csv(os.path.join(path, "combined_latency.csv"), index = False)
+
     return combined

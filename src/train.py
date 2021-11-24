@@ -86,6 +86,9 @@ def test_mse(all_comb, df):
 
 def best_performance(df):
     print("finding best performance")
-    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca'], ascending = False)[:1]
+    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca'], ascending = False)
+    path = os.path.join(os.getcwd() , "outputs")
+    #combined.to_csv("combined_latency.csv")
+    sorted.to_csv(os.path.join(path, "sorted_df.csv"), index = False)
+    return sorted[:1]
 
-    return sorted
