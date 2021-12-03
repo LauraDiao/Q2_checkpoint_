@@ -18,20 +18,27 @@ sys.path.insert(0, 'src')
 from etl import *
 from helper import *
 from train import *
+from eda import *
 
 def main(targets):
-
+    out_path = os.path.join(os.getcwd() , "outputs")
     #train_config = json.load(open('config/train.json'))
     transform_config = json.load(open('config/transform.json'))
     columns = json.load(open('config/columns.json'))
-
+    eda_config = json.load(open('config/eda.json'))
+       
     if 'test' in targets:
-        transformed_data = gen(**transform_config)
+        gen(**transform_config)
         combs = getAllCombinations(**columns)
-        
-        results = test_mse(combs, transformed_data)
-        best = best_performance(results)
-        print("Found best performances: {}".format(best))
+        test_mse(combs)
+        best = best_performance()
+        print("Found Best Performance: ")
+        print(best)
+
+    
+    if 'eda' in targets:  
+        gen(**transform_config)
+        main_eda(**eda_config)
 
 if __name__ == '__main__':
 

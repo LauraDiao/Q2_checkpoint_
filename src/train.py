@@ -15,10 +15,17 @@ from sklearn.metrics import mean_squared_error
 import warnings
 warnings.filterwarnings("ignore")
 
-def test_feat(cols, df): 
-    combined = df
-    X = combined[cols]
-    y = combined.latency
+def test_feat(df, cols, p): 
+    # col is feauture comb
+    # p is for loss or latency
+    # 1: loss  # 2 : latency
+    X = df[cols]
+    
+    if p == 1: 
+        y = df.loss
+    if p == 2: 
+        y = df.latency
+        
     # randomly split into train and test sets, test set is 80% of data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=1)
     
@@ -26,6 +33,9 @@ def test_feat(cols, df):
     clf = clf.fit(X_train,y_train)
     y_pred = clf.predict(X_test)
     acc1 = mean_squared_error(y_test, y_pred)
+    
+    # calculate loss
+    # retreive metrics
     #print("Decision Tre Accuracy:", acc1, '\n')
     
     clf2 = RandomForestRegressor(n_estimators=10)
@@ -51,6 +61,7 @@ def test_feat(cols, df):
     
     return [acc1, acc2, acc3, acc4 ]
 
+
 def getAllCombinations(object_list):
     lst = ['total_bytes', 'max_bytes', 'proto', '1->2Bytes','2->1Bytes', '1->2Pkts', '2->1Pkts', 'total_pkts', 'loss']
     uniq_objs = set(lst)
@@ -62,33 +73,51 @@ def getAllCombinations(object_list):
     print("all combinations generated")
     return combinations
 
-def test_mse(all_comb, df):
+def test_mse(all_comb):
+
+    filedir = os.path.join(os.getcwd(), "outputs", "combined_t_latency.csv")
+    df = pd.read_csv(filedir)
     all_comb2 = pd.Series(all_comb).apply(lambda x: list(x))
     dt = []
     rf = []
     et = []
     pca = []
-    counter = 0
+    dt2 = []
+    rf2 = []
+    et2 = []
+    pca2 = []
     for i in all_comb2:
-        accs = test_feat(i, df)
+        # 1 = loss
+        # 2 = latency
+        acc_loss = test_feat(df, i, 1)
+        acc_latency = test_feat(df, i, 2)
         #print(accs)
-        dt.append(accs[0])
-        rf.append(accs[1])
-        et.append(accs[2])
-        pca.append(accs[3])
-        counter +=1
-        #print("combination:" + str(counter))
-
-    dictin = {'feat': all_comb, 'dt': dt, 'rf': rf, 'et': et, 'pca': pca}
-   
-    feat_df = pd.DataFrame(dictin)
-    return feat_df 
-
-def best_performance(df):
-    print("finding best performance")
-    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca'], ascending = False)
+        dt.append(acc_loss[0])
+        rf.append(acc_loss[1])
+        et.append(acc_loss[2])
+        pca.append(acc_loss[3])
+        
+        dt2.append(acc_latency[0])
+        rf2.append(acc_latency[1])
+        et2.append(acc_latency[2])
+        pca2.append(acc_latency[3])        
+    
+    dict1 = pd.DataFrame({'feat': all_comb, 'dt': dt, 'rf': rf, 'et': et, 'pca': pca})
+    dict2 = pd.DataFrame({'feat2': all_comb, 'dt2': dt2, 'rf2': rf2, 'et2': et2, 'pca2': pca2})
+    
+    feat_df = pd.concat([dict1, dict2], axis=1).drop(['feat2'], axis=1)
     path = os.path.join(os.getcwd() , "outputs")
+    feat_df.to_csv(os.path.join(path, "feat_df.csv"), index = False)
+    
+    # return feat_df
+
+def best_performance():
+    print("finding best performance")
+    filedir = os.path.join(os.getcwd(), "outputs", "feat_df.csv")
+    df = pd.read_csv(filedir)
+    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = False)
+    
     #combined.to_csv("combined_latency.csv")
-    sorted.to_csv(os.path.join(path, "sorted_df.csv"), index = False)
+    # sorted.to_csv(os.path.join(path, "sorted_df.csv"), index = False)
     return sorted[:1]
 

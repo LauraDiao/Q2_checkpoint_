@@ -1,3 +1,10 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.datasets import load_digits
+from sklearn.model_selection import learning_curve
+from sklearn.model_selection import ShuffleSplit
 import pandas as pd
 import os
 import glob
@@ -67,3 +74,44 @@ def onehot_(df):
     d_p2 = pd.get_dummies(df['Port2'])
     temp_df = pd.concat([df, d_proto, d_p1, d_p2], axis=1)
     return temp_df
+
+
+def time(dataframe): 
+    # scales seconds 
+    mini = dataframe['Time'].min()
+    temp1 = dataframe.assign(Second = lambda x: x['Time'] - mini)
+
+    return temp1
+
+
+def main2(temp_df):
+    transformed = temp_df #time(temp_df)
+    label = 'latency'
+    s =[ 'Second', label]
+    p_sum_agg = transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
+
+    b_agg = transformed.groupby(s)['total_bytes'].agg(['count', 'sum']).reset_index()
+    
+    p_agg =  transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
+    
+    return [p_sum_agg, b_agg, p_agg]
+
+def genfeat(df): 
+    tdf = df
+    tdf['total_bytes'] = tdf['1->2Bytes'] + tdf['2->1Bytes'] # combining bytes
+    tdf['total_pkts'] = tdf['1->2Pkts'] + tdf['2->1Pkts'] # combining packets
+    tdf['packet_sizes'] = tdf['packet_sizes'].astype('str').apply(return_int) # converting list of packet sizes to type int
+    tdf['pkt sum'] = tdf['packet_sizes'].apply(lambda x: sum(x)) # summing packets
+    tdf['packet_dirs'] = tdf['packet_dirs'].astype('str').apply(return_int) # converting to type int
+    tdf['longest_seq'] = tdf['packet_dirs'].apply(longest_seq) # finding longest sequence
+    tdf['packet_times'] = tdf['packet_times'].apply(return_int) # converting to int
+    #tdf = onehot_(tdf)
+    def maxbyte(x):
+        x = pd.DataFrame([x[0],x[1]]).T.groupby(0).sum().max().values[0]
+        return x
+    mx_byte = tdf[['packet_times', 'packet_sizes']].apply(maxbyte, axis =1) 
+    tdf['max_bytes'] = mx_byte
+    # print("max bytes generated")
+    return tdf        
+
+

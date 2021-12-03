@@ -22,6 +22,8 @@ def readfilerun(run):
     #print(dir_files) # listing all files in directory
 
     df_lst = []
+    rawdf_lst = []
+    subsetsec = []
     # loop over the list of csv files
     for f in dir_files:
         #print(f)
@@ -49,44 +51,51 @@ def readfilerun(run):
         tempdf3 = tempdf2.assign(iteration = run)
         
         # data processing 
-        tdf = tempdf3
-        tdf['total_bytes'] = tdf['1->2Bytes'] + tdf['2->1Bytes'] # combining bytes
-        tdf['total_pkts'] = tdf['1->2Pkts'] + tdf['2->1Pkts'] # combining packets
-        tdf['packet_sizes'] = tdf['packet_sizes'].astype('str').apply(return_int) # converting list of packet sizes to type int
-        tdf['pkt sum'] = tdf['packet_sizes'].apply(lambda x: sum(x)) # summing packets
-        tdf['packet_dirs'] = tdf['packet_dirs'].astype('str').apply(return_int) # converting to type int
-        tdf['longest_seq'] = tdf['packet_dirs'].apply(longest_seq) # finding longest sequence
-        tdf['packet_times'] = tdf['packet_times'].apply(return_int) # converting to int
-        #tdf = onehot_(tdf)
-        def maxbyte(x):
-            x = pd.DataFrame([x[0],x[1]]).T.groupby(0).sum().max().values[0]
-            return x
-        mx_byte = tdf[['packet_times', 'packet_sizes']].apply(maxbyte, axis =1) 
-        tdf['max_bytes'] = mx_byte
+        df_cols = genfeat(tempdf3)
         
-        # input is 10 seconds of network traffic, so to predict for a period of time, 
-        # need to aggregate features over 10 seconds
-        f_df = agg10(tdf)
+        time_scaled = time(df_cols)
+        rawdf_lst.append(time_scaled)
         
+        df_mid = time_scaled.iloc[20:40]
+        subsetsec.append(df_mid)
+        
+        f_df = agg10(df_cols)
         df_lst.append(f_df)
+        
     
-    # concatenating all of the dataframes from one run
-    new = pd.concat(df_lst ,ignore_index=True)#.reset_index(drop = True)
+    # concatenating all of the dataframes agg over 10 from one run
+    newfeat = pd.concat(df_lst ,ignore_index=True)#.reset_index(drop = True)
+    
     #new_filename = "run"+ str(run) + "_merged.csv"
     #new.to_csv(new_filename, index=False)
-        
-    return new
+    
+    # raw data
+    newdf = pd.concat(rawdf_lst ,ignore_index=True)#.reset_index(drop = True)
+    subset_newdf = pd.concat(subsetsec ,ignore_index=True)
+    
+    return newdf, subset_newdf, newfeat
 
 
 def gen(runs):
-    dfs = []
+    data = []
+    datasubset = []
+    transformed = []
     for i in runs: 
-        dfs.append(readfilerun(i))
+        data_i, datasubset_i, transformed_i = readfilerun(i)
 
-    combined = pd.concat(dfs , ignore_index=True)#.reset_index(drop = True)
+        data.append(data_i)
+        datasubset.append(datasubset_i)
+        transformed.append(transformed_i)
+        print("run " + str(i) + " generated")
 
     path = os.path.join(os.getcwd() , "outputs")
-    #combined.to_csv("combined_latency.csv")
-    combined.to_csv(os.path.join(path, "combined_latency.csv"), index = False)
 
-    return combined
+    combined_data = pd.concat(data , ignore_index=True)#.reset_index(drop = True)
+    combined_data.to_csv(os.path.join(path, "combined_all_latency.csv"), index = False)
+    
+    combined_subset = pd.concat(datasubset , ignore_index=True)
+    combined_subset.to_csv(os.path.join(path, "combined_subset_latency.csv"), index = False)
+    
+    combined_t = pd.concat(transformed, ignore_index=True)  
+    combined_t.to_csv(os.path.join(path, "combined_t_latency.csv"), index = False)
+    return combined_t
