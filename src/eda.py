@@ -14,18 +14,54 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
 import seaborn as sns
 
+from eda_helper import *
+
 import warnings
 warnings.filterwarnings("ignore")
-warnings.filterwarnings("ignore")
 
-def main_eda(lst, filen1, filen2 ):
+
+def main_eda(lst, filen1, filen2, filen3):
     fpath1 = os.path.join(os.getcwd() , "outputs", filen1)
     df_1 = pd.read_csv(fpath1)
-    plottogether(lst, df_1, filen1.strip(".csv"))
-
     fpath2 = os.path.join(os.getcwd() , "outputs", filen2)
     df_2 = pd.read_csv(fpath2)
-    plotloss(df_2)
+    fpath3 = os.path.join(os.getcwd() , "outputs", filen3)
+    df_3 = pd.read_csv(fpath3)
+    
+    plottogether(lst, df_1, filen1.strip(".csv")) # trends over subset
+    plottogether(lst, df_3, filen3.strip(".csv")) # trends over entire data
+    # plotloss(df_2)
+
+    # aggregation_by_second_plot('total_bytes',sum,df_2,'latency',20, 10000)
+    plot_correlation_matrix(df_2) # correlation matrix
+    plotlongest(df_3)
+    
+def plotlongest(df):
+    l1 = df[df['loss'] == 10000]
+    #l2 = df[df['label'] == 0.00001]
+    byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
+    #byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','label']]
+    plt.figure(figsize = (15,10))
+    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "10000")
+    #plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "100000")
+    plt.legend(title = "Packet Loss", loc="upper right")
+    plt.xlabel('Seconds')
+    plt.ylabel('Longest Sequence')
+    plt.title('Longest Sequence Per Second')
+    path = os.path.join(os.getcwd() , "outputs")
+    saveto = os.path.join(path, "eda","longest_seq.png")
+    plt.savefig(saveto)
+
+def plot_correlation_matrix(df):
+    corrmat = df.corr()
+    top_corr_features = corrmat.index
+    fig = plt.figure(figsize=(20,20))
+    sns.heatmap(df[top_corr_features].corr(),annot=True,cmap="RdYlGn")
+    #savefig
+    path = os.path.join(os.getcwd() , "outputs")
+    saveto = os.path.join(path, "eda","correlation_matrix.png")
+    fig.savefig(saveto)
+
 
 def plot_main4(df_1, l1, df_2, l2, picname):
     

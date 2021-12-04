@@ -27,8 +27,7 @@ def main(targets):
     transform_config = json.load(open('config/transform.json'))
     columns = json.load(open('config/columns.json'))
     eda_config = json.load(open('config/eda.json'))
-       
-
+    
     if 'data' in targets:
         gen(**transform_config)
 
@@ -48,14 +47,20 @@ def main(targets):
         print("tune?")
     
     if 'all' in targets: 
+        print("running target " + "data")
         gen(**transform_config)
+
+        print("running target " + "eda")
         main_eda(**eda_config)
 
+        print("running target " + "generate")
         combs = getAllCombinations(**columns)
         test_mse(combs)
         best = best_performance()
         print("Found Best Performance: ")
         print(best)
+
+        print("running target" + 'tune')
 
 
 if __name__ == '__main__':

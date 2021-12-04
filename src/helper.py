@@ -17,6 +17,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
+from eda_helper import *
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -112,11 +113,16 @@ def genfeat(df):
     tdf['longest_seq'] = tdf['packet_dirs'].apply(longest_seq) # finding longest sequence
     tdf['packet_times'] = tdf['packet_times'].apply(return_int) # converting to int
     #tdf = onehot_(tdf)
-    def maxbyte(x):
-        x = pd.DataFrame([x[0],x[1]]).T.groupby(0).sum().max().values[0]
-        return x
-    mx_byte = tdf[['packet_times', 'packet_sizes']].apply(maxbyte, axis =1) 
-    tdf['max_bytes'] = mx_byte
+    # def maxbyte(x):
+    #     x = pd.DataFrame([x[0],x[1]]).T.groupby(0).sum().max().values[0]
+    #     return x
+    # mx_byte = tdf[['packet_times', 'packet_sizes']].apply(maxbyte, axis =1) 
+    # tdf['max_bytes'] = mx_byte
+    df['number_ms'] = df['packet_times'].apply(lambda x: pd.Series(x).nunique())
+    df['max_bytes'] = df.apply(lambda x: max_bytes(x['packet_times'],x['packet_sizes']),axis=1)
+    df['total_pkt_sizes'] = df.packet_sizes.apply(lambda x: sum(x))
+    df['pkt_ratio'] = df.total_pkt_sizes / df.total_pkts
+    df['time_spread'] = df.packet_times.apply(lambda x: x[-1] - x[0])
     # print("max bytes generated")
     return tdf        
 
