@@ -12,9 +12,10 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
 
 from helper import *
+import warnings
+warnings.filterwarnings("ignore")
 
-
-def readfilerun(run):
+def readfilerun(run, subset_range):
     "reads in files from each run"
     #path =  os.path.join(os.getcwd())
     testdir = os.path.join(os.getcwd(), "test", "run" + str(run))
@@ -56,7 +57,7 @@ def readfilerun(run):
         time_scaled = time(df_cols)
         rawdf_lst.append(time_scaled)
         
-        df_mid = time_scaled.iloc[20:40]
+        df_mid = time_scaled.iloc[0:subset_range]
         subsetsec.append(df_mid)
         
         f_df = agg10(df_cols)
@@ -76,12 +77,12 @@ def readfilerun(run):
     return newdf, subset_newdf, newfeat
 
 
-def gen(runs):
+def gen(runs, subset):
     data = []
     datasubset = []
     transformed = []
     for i in runs: 
-        data_i, datasubset_i, transformed_i = readfilerun(i)
+        data_i, datasubset_i, transformed_i = readfilerun(i, subset)
 
         data.append(data_i)
         datasubset.append(datasubset_i)

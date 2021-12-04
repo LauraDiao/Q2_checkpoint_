@@ -13,6 +13,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
 
+
 sys.path.insert(0, 'src')
 
 from etl import *
@@ -27,7 +28,15 @@ def main(targets):
     columns = json.load(open('config/columns.json'))
     eda_config = json.load(open('config/eda.json'))
        
-    if 'test' in targets:
+
+    if 'data' in targets:
+        gen(**transform_config)
+
+    if 'eda' in targets:  
+        gen(**transform_config)
+        main_eda(**eda_config)
+
+    if 'generate' in targets:
         gen(**transform_config)
         combs = getAllCombinations(**columns)
         test_mse(combs)
@@ -35,10 +44,19 @@ def main(targets):
         print("Found Best Performance: ")
         print(best)
 
+    if 'tune' in targets: 
+        print("tune?")
     
-    if 'eda' in targets:  
+    if 'all' in targets: 
         gen(**transform_config)
         main_eda(**eda_config)
+
+        combs = getAllCombinations(**columns)
+        test_mse(combs)
+        best = best_performance()
+        print("Found Best Performance: ")
+        print(best)
+
 
 if __name__ == '__main__':
 

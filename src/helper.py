@@ -18,6 +18,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
 
+import warnings
+warnings.filterwarnings("ignore")
 
 # Data cleaning to turn columns into list of integers
 def return_int(x):
@@ -87,13 +89,17 @@ def time(dataframe):
 def main2(temp_df):
     transformed = temp_df #time(temp_df)
     label = 'latency'
-    s =[ 'Second', label]
-    p_sum_agg = transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
 
+    # print(transformed.columns)
+    s =[ 'Second', label]
+    
+    p_sum_agg = transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
+    # print(p_sum_agg.columns)
+    
     b_agg = transformed.groupby(s)['total_bytes'].agg(['count', 'sum']).reset_index()
     
     p_agg =  transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
-    
+    # print("all aggregations made")
     return [p_sum_agg, b_agg, p_agg]
 
 def genfeat(df): 
