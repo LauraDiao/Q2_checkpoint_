@@ -77,11 +77,18 @@ def readfilerun(run, subset_range):
     return newdf, subset_newdf, newfeat
 
 
-def gen(runs, subset):
+def gen(cond ,runs, unseen_runs, subset):
+    unseen = ""
+    if cond != 'unseen':
+        curr_runs = runs
+    if cond =='unseen': 
+        curr_runs = unseen_runs
+        unseen = "unseen"
+    
     data = []
     datasubset = []
     transformed = []
-    for i in runs: 
+    for i in curr_runs: 
         data_i, datasubset_i, transformed_i = readfilerun(i, subset)
 
         data.append(data_i)
@@ -92,11 +99,11 @@ def gen(runs, subset):
     path = os.path.join(os.getcwd() , "outputs")
 
     combined_data = pd.concat(data , ignore_index=True)#.reset_index(drop = True)
-    combined_data.to_csv(os.path.join(path, "combined_all_latency.csv"), index = False)
+    combined_data.to_csv(os.path.join(path, unseen + "combined_all_latency.csv"), index = False)
     
     combined_subset = pd.concat(datasubset , ignore_index=True)
-    combined_subset.to_csv(os.path.join(path, "combined_subset_latency.csv"), index = False)
+    combined_subset.to_csv(os.path.join(path, unseen +  "combined_subset_latency.csv"), index = False)
     
     combined_t = pd.concat(transformed, ignore_index=True)  
-    combined_t.to_csv(os.path.join(path, "combined_t_latency.csv"), index = False)
+    combined_t.to_csv(os.path.join(path, unseen +  "combined_t_latency.csv"), index = False)
     return combined_t

@@ -20,51 +20,112 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def main_eda(lst, filen1, filen2, filen3):
-    fpath1 = os.path.join(os.getcwd() , "outputs", filen1)
+def main_eda(cond, lst, filen1, filen2, filen3):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
+    
+    fpath1 = os.path.join(os.getcwd() , "outputs", unseen + filen1)
     df_1 = pd.read_csv(fpath1)
-    fpath2 = os.path.join(os.getcwd() , "outputs", filen2)
+    fpath2 = os.path.join(os.getcwd() , "outputs", unseen + filen2)
     df_2 = pd.read_csv(fpath2)
-    fpath3 = os.path.join(os.getcwd() , "outputs", filen3)
+    fpath3 = os.path.join(os.getcwd() , "outputs", unseen + filen3)
     df_3 = pd.read_csv(fpath3)
     
-    plottogether(lst, df_1, filen1.strip(".csv")) # trends over subset
-    plottogether(lst, df_3, filen3.strip(".csv")) # trends over entire data
-    # plotloss(df_2)
+    plottogether(cond, lst, df_1, filen1.strip(".csv")) # trends over subset
+    plottogether(cond, lst, df_3, filen3.strip(".csv")) # trends over entire data
+    plotloss(cond, df_2)
 
-    # aggregation_by_second_plot('total_bytes',sum,df_2,'latency',20, 10000)
-    plot_correlation_matrix(df_2) # correlation matrix
-    plotlongest(df_3)
-    
-def plotlongest(df):
-    l1 = df[df['loss'] == 10000]
-    #l2 = df[df['label'] == 0.00001]
-    byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
-    #byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','label']]
-    plt.figure(figsize = (15,10))
-    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "10000")
-    #plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "100000")
-    plt.legend(title = "Packet Loss", loc="upper right")
-    plt.xlabel('Seconds')
-    plt.ylabel('Longest Sequence')
-    plt.title('Longest Sequence Per Second')
-    path = os.path.join(os.getcwd() , "outputs")
-    saveto = os.path.join(path, "eda","longest_seq.png")
-    plt.savefig(saveto)
+    plot_correlation_matrix(cond, df_2) # correlation matrix
+    plotlongest(df_3, cond)
+    # below makes rest of visualizations
+    plotbytes(df_3)
 
-def plot_correlation_matrix(df):
+def plotbytes(df):
+    # series over loss
+    lst_loss = ['total_bytes', 'max_bytes']
+    # series over latency
+    lst_lat = ['number_ms', 'total_pkts']
+    for i in lst_loss: 
+        l1 = df[df['loss'] == 25000]
+        l2 = df[df['loss'] == 50000]
+        byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'loss']]
+        byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'loss']]
+        plt.figure(figsize = (15,10))
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "25000")
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "50000")
+        plt.legend(title = "Packet Loss", loc="upper right")
+        plt.xlabel('Seconds')
+        plt.ylabel(i.replace("_", '').capitalize())
+        plt.title(i.replace("_", '').capitalize() + ' Per Second')
+        path = os.path.join(os.getcwd() , "outputs")
+        saveto = os.path.join(path, "eda", i + ".png")
+        plt.savefig(saveto)
+    for i in lst_lat:
+        l1 = df[df['latency'] == 40]
+        l2 = df[df['latency'] == 120]
+        byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'latency']]
+        byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'latency']]
+        plt.figure(figsize = (15,10))
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "40")
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "120")
+        plt.legend(title = "Packet Loss", loc="upper right")
+        plt.xlabel('Seconds')
+        plt.ylabel(i.replace("_", '').capitalize())
+        plt.title(i.replace("_", '').capitalize() + ' Per Second')
+        path = os.path.join(os.getcwd() , "outputs")
+        saveto = os.path.join(path, "eda", i + ".png")
+        plt.savefig(saveto)
+    return
+
+def plotlongest(df, cond):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
+        l1 = df[df['loss'] == 30000]
+        byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
+        plt.figure(figsize = (15,10))
+        plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "30000")
+        plt.legend(title = "Packet Loss", loc="upper right")
+        plt.xlabel('Seconds')
+        plt.ylabel('Longest Sequence')
+        plt.title('Longest Sequence Per Second')
+        path = os.path.join(os.getcwd() , "outputs")
+        saveto = os.path.join(path, "eda", unseen + "longest_seq.png")
+    else: 
+        l1 = df[df['loss'] == 25000]
+        l2 = df[df['loss'] == 50000]
+        byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
+        byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
+        plt.figure(figsize = (15,10))
+        plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "25000")
+        plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "50000")
+        plt.legend(title = "Packet Loss", loc="upper right")
+        plt.xlabel('Seconds')
+        plt.ylabel('Longest Sequence')
+        plt.title('Longest Sequence Per Second')
+        path = os.path.join(os.getcwd() , "outputs")
+        saveto = os.path.join(path, "eda","longest_seq.png")
+        plt.savefig(saveto)
+
+def plot_correlation_matrix(cond, df):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     corrmat = df.corr()
     top_corr_features = corrmat.index
     fig = plt.figure(figsize=(20,20))
     sns.heatmap(df[top_corr_features].corr(),annot=True,cmap="RdYlGn")
     #savefig
     path = os.path.join(os.getcwd() , "outputs")
-    saveto = os.path.join(path, "eda","correlation_matrix.png")
+    saveto = os.path.join(path, "eda", unseen + "correlation_matrix.png")
     fig.savefig(saveto)
 
 
-def plot_main4(df_1, l1, df_2, l2, picname):
-    
+def plot_main4(cond, df_1, l1, df_2, l2, picname):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     #separating all of the aggregates for each loss
 
     tp_sum_agg, tb_agg, tp_agg = main2(df_1)
@@ -92,11 +153,14 @@ def plot_main4(df_1, l1, df_2, l2, picname):
     plt.subplots_adjust(hspace = 0.8)
     #savefig
     path = os.path.join(os.getcwd() , "outputs")
-    saveto = os.path.join(path, "eda","latency_trends_" + picname + ".png")
+    saveto = os.path.join(path, "eda", unseen + "latency_trends_" + picname + ".png")
     fig.savefig(saveto)
     print("end of main4")
 
-def plottogether(lst, df_e, picname): 
+def plottogether(cond, lst, df_e, picname): 
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     leftrun = lst[0]
     rightrun = lst[1]
     values = df_e['iteration'].unique()
@@ -105,7 +169,7 @@ def plottogether(lst, df_e, picname):
     subset2 = df_e[df_e['iteration'] == rightrun]
     # print(subset1.shape)
     # print(subset2.shape)
-    plot_main4(subset1, str(leftrun), subset2, str(rightrun), picname)
+    plot_main4(cond, subset1, str(leftrun), subset2, str(rightrun), picname)
 
 def plot_learning_curve(
     estimator,
@@ -198,9 +262,10 @@ def plot_learning_curve(
 
     return plt
 
-def plotloss(df):
-    warnings.filterwarnings("ignore")
-
+def plotloss(cond, df):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     fig, axes = plt.subplots(3, 3, figsize=(10, 15))
 
     X = df.drop(['latency'], axis=1)
@@ -235,5 +300,5 @@ def plotloss(df):
     #plt.show()
     #savefig
     path = os.path.join(os.getcwd() , "outputs")
-    saveto = os.path.join(path, "eda","learning_curves.png")
+    saveto = os.path.join(path, "eda", unseen + "learning_curves.png")
     fig.savefig(saveto)

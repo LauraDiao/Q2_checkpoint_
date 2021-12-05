@@ -15,28 +15,35 @@ from sklearn.metrics import mean_squared_error
 import warnings
 warnings.filterwarnings("ignore")
 
-def test_feat(df, cols, p): 
+def test_feat(cond, df, cols, p, df_u): 
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     # col is feauture comb
     # p is for loss or latency
     # 1: loss  # 2 : latency
     X = df[cols]
-    
+    X2 = df_u[cols]
+
     if p == 1: 
         y = df.loss
+        y2 = df_u.loss
     if p == 2: 
         y = df.latency
+        y2 = df_u.loss
         
     # randomly split into train and test sets, test set is 80% of data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=1)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+    X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2, random_state=1)
+
+    if unseen == 'unseen': 
+        X_test = X2
+        y_test = y2
     
     clf = DecisionTreeRegressor()
     clf = clf.fit(X_train,y_train)
     y_pred = clf.predict(X_test)
     acc1 = mean_squared_error(y_test, y_pred)
-    
-    # calculate loss
-    # retreive metrics
-    #print("Decision Tre Accuracy:", acc1, '\n')
     
     clf2 = RandomForestRegressor(n_estimators=10)
     clf2 = clf2.fit(X_train,y_train)
@@ -73,9 +80,14 @@ def getAllCombinations(object_list):
     print("all combinations generated")
     return combinations
 
-def test_mse(all_comb):
-
+def test_mse(cond, all_comb):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
+    filedir_unseen = os.path.join(os.getcwd(), "outputs", unseen + "combined_t_latency.csv")
+    df_unseen = pd.read_csv(filedir_unseen)
     filedir = os.path.join(os.getcwd(), "outputs", "combined_t_latency.csv")
+    
     df = pd.read_csv(filedir)
     all_comb2 = pd.Series(all_comb).apply(lambda x: list(x))
     dt = []
@@ -89,8 +101,8 @@ def test_mse(all_comb):
     for i in all_comb2:
         # 1 = loss
         # 2 = latency
-        acc_loss = test_feat(df, i, 1)
-        acc_latency = test_feat(df, i, 2)
+        acc_loss = test_feat(cond, df, i, 1, df_unseen)
+        acc_latency = test_feat(cond, df, i, 2, df_unseen)
         #print(accs)
         dt.append(acc_loss[0])
         rf.append(acc_loss[1])
@@ -107,17 +119,20 @@ def test_mse(all_comb):
     
     feat_df = pd.concat([dict1, dict2], axis=1).drop(['feat2'], axis=1)
     path = os.path.join(os.getcwd() , "outputs")
-    feat_df.to_csv(os.path.join(path, "feat_df.csv"), index = False)
+    feat_df.to_csv(os.path.join(path, unseen + "feat_df.csv"), index = False)
     
     # return feat_df
 
-def best_performance():
+def best_performance(cond):
+    unseen = ''
+    if cond == 'unseen': 
+        unseen = 'unseen'
     print("finding best performance")
-    filedir = os.path.join(os.getcwd(), "outputs", "feat_df.csv")
+    filedir = os.path.join(os.getcwd(), "outputs", unseen + "feat_df.csv")
     df = pd.read_csv(filedir)
-    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = False)
+    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = True)
     
     #combined.to_csv("combined_latency.csv")
     # sorted.to_csv(os.path.join(path, "sorted_df.csv"), index = False)
-    return sorted[:1]
+    return sorted[:10]
 

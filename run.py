@@ -22,46 +22,45 @@ from train import *
 from eda import *
 
 def main(targets):
-    out_path = os.path.join(os.getcwd() , "outputs")
-    #train_config = json.load(open('config/train.json'))
+
     transform_config = json.load(open('config/transform.json'))
     columns = json.load(open('config/columns.json'))
     eda_config = json.load(open('config/eda.json'))
     
+    test_unseen = 'unseen'
+    test_seen = 'seen'
+
     if 'data' in targets:
-        gen(**transform_config)
+        """generating feat from unseen and seen data"""
+        gen(test_seen, **transform_config)
+        gen(test_unseen, **transform_config)
 
     if 'eda' in targets:  
-        gen(**transform_config)
-        main_eda(**eda_config)
+        gen(test_seen, **transform_config)
+        main_eda(test_seen, **eda_config)
 
     if 'generate' in targets:
-        gen(**transform_config)
+        gen(test_seen, **transform_config)
+        gen(test_unseen,**transform_config)
+        
         combs = getAllCombinations(**columns)
-        test_mse(combs)
-        best = best_performance()
-        print("Found Best Performance: ")
-        print(best)
+        
+        print("Testing on seen data: ")
+        test_mse(test_seen, combs)
+        best = best_performance(test_seen)
+        print("Performance for seen data: ", "\n", best, "\n")
+        
+        print("Testing on unseen data: ")
+        test_mse(test_unseen, combs)
+        best2 = best_performance(test_unseen)
+        print("Performance for unseen data: ", "\n", best2, "\n")
+        
 
     if 'tune' in targets: 
         print("tune?")
     
-    if 'all' in targets: 
-        print("running target " + "data")
-        gen(**transform_config)
-
-        print("running target " + "eda")
-        main_eda(**eda_config)
-
-        print("running target " + "generate")
-        combs = getAllCombinations(**columns)
-        test_mse(combs)
-        best = best_performance()
-        print("Found Best Performance: ")
-        print(best)
-
-        print("running target" + 'tune')
-
+    # if 'all' in targets: 
+        
 
 if __name__ == '__main__':
 
