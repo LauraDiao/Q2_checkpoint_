@@ -26,7 +26,8 @@ def main(targets):
     transform_config = json.load(open('config/transform.json'))
     columns = json.load(open('config/columns.json'))
     eda_config = json.load(open('config/eda.json'))
-    
+    all_config = json.load(open("config/all.json"))
+
     test_unseen = 'unseen'
     test_seen = 'seen'
 
@@ -39,7 +40,8 @@ def main(targets):
         gen(test_seen, **transform_config)
         main_eda(test_seen, **eda_config)
 
-    if 'generate' in targets:
+    if 'train' in targets:
+        "trains tests in this target"
         gen(test_seen, **transform_config)
         gen(test_unseen,**transform_config)
         
@@ -49,17 +51,48 @@ def main(targets):
         test_mse(test_seen, combs)
         best = best_performance(test_seen)
         print("Performance for seen data: ", "\n", best, "\n")
-        
+                
+    if "inference" in targets: 
         print("Testing on unseen data: ")
         test_mse(test_unseen, combs)
         best2 = best_performance(test_unseen)
         print("Performance for unseen data: ", "\n", best2, "\n")
-        
-
-    if 'tune' in targets: 
-        print("tune?")
     
-    # if 'all' in targets: 
+    if "test" in targets: 
+        """ runs all targets on sample data"""
+        gen(test_seen, **transform_config)
+        gen(test_unseen, **transform_config)
+        main_eda(test_seen, **eda_config)
+
+        combs = getAllCombinations(**columns)
+        
+        print("Testing on seen data: ")
+        test_mse(test_seen, combs)
+        best = best_performance(test_seen)
+        print("Performance for seen data: ", "\n", best, "\n")
+
+        print("Testing on unseen data: ")
+        test_mse(test_unseen, combs)
+        best2 = best_performance(test_unseen)
+        print("Performance for unseen data: ", "\n", best2, "\n")
+
+    if 'all' in targets: 
+        """ runs all targets on all data"""
+        gen(test_seen, **all_config)
+        gen(test_unseen, **all_config)
+        main_eda(test_seen, **eda_config)
+
+        combs = getAllCombinations(**columns)
+        
+        print("Testing on seen data: ")
+        test_mse(test_seen, combs)
+        best = best_performance(test_seen)
+        print("Performance for seen data: ", "\n", best, "\n")
+
+        print("Testing on unseen data: ")
+        test_mse(test_unseen, combs)
+        best2 = best_performance(test_unseen)
+        print("Performance for unseen data: ", "\n", best2, "\n")
         
 
 if __name__ == '__main__':

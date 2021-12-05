@@ -34,7 +34,7 @@ def main_eda(cond, lst, filen1, filen2, filen3):
     
     plottogether(cond, lst, df_1, filen1.strip(".csv")) # trends over subset
     plottogether(cond, lst, df_3, filen3.strip(".csv")) # trends over entire data
-    plotloss(cond, df_2)
+    # plotloss(cond, df_2)
 
     plot_correlation_matrix(cond, df_2) # correlation matrix
     plotlongest(df_3, cond)
