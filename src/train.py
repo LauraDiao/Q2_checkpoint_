@@ -130,9 +130,13 @@ def best_performance(cond):
     print("finding best performance")
     filedir = os.path.join(os.getcwd(), "outputs", unseen + "feat_df.csv")
     df = pd.read_csv(filedir)
+    print("Performance sorted from lowest to highest")
     sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = True)
-    
+    print(sorted[:5])
+    print("Performance sorted from highest to lowest")
+    sorted_2 = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = False)
+    print(sorted_2[:5])
     #combined.to_csv("combined_latency.csv")
     # sorted.to_csv(os.path.join(path, "sorted_df.csv"), index = False)
-    return sorted[:10]
+
 

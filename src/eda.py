@@ -34,7 +34,7 @@ def main_eda(cond, lst, filen1, filen2, filen3):
     
     plottogether(cond, lst, df_1, filen1.strip(".csv")) # trends over subset
     plottogether(cond, lst, df_3, filen3.strip(".csv")) # trends over entire data
-    # plotloss(cond, df_2)
+    plotloss(cond, df_2)
 
     plot_correlation_matrix(cond, df_2) # correlation matrix
     plotlongest(df_3, cond)
@@ -47,13 +47,13 @@ def plotbytes(df):
     # series over latency
     lst_lat = ['number_ms', 'total_pkts']
     for i in lst_loss: 
-        l1 = df[df['loss'] == 25000]
-        l2 = df[df['loss'] == 50000]
+        l1 = df[df['loss'] == 200]
+        l2 = df[df['loss'] == 20000]
         byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'loss']]
         byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'loss']]
         plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "25000")
-        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "50000")
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "200")
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "20000")
         plt.legend(title = "Packet Loss", loc="upper right")
         plt.xlabel('Seconds')
         plt.ylabel(i.replace("_", '').capitalize())
@@ -62,13 +62,13 @@ def plotbytes(df):
         saveto = os.path.join(path, "eda", i + ".png")
         plt.savefig(saveto)
     for i in lst_lat:
-        l1 = df[df['latency'] == 40]
-        l2 = df[df['latency'] == 120]
+        l1 = df[df['latency'] == 20]
+        l2 = df[df['latency'] == 420]
         byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'latency']]
         byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'latency']]
         plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "40")
-        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "120")
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "20")
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "420")
         plt.legend(title = "Packet Loss", loc="upper right")
         plt.xlabel('Seconds')
         plt.ylabel(i.replace("_", '').capitalize())
@@ -79,34 +79,20 @@ def plotbytes(df):
     return
 
 def plotlongest(df, cond):
-    unseen = ''
-    if cond =='unseen': 
-        unseen = 'unseen'
-        l1 = df[df['loss'] == 30000]
-        byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
-        plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "30000")
-        plt.legend(title = "Packet Loss", loc="upper right")
-        plt.xlabel('Seconds')
-        plt.ylabel('Longest Sequence')
-        plt.title('Longest Sequence Per Second')
-        path = os.path.join(os.getcwd() , "outputs")
-        saveto = os.path.join(path, "eda", unseen + "longest_seq.png")
-    else: 
-        l1 = df[df['loss'] == 25000]
-        l2 = df[df['loss'] == 50000]
-        byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
-        byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
-        plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "25000")
-        plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "50000")
-        plt.legend(title = "Packet Loss", loc="upper right")
-        plt.xlabel('Seconds')
-        plt.ylabel('Longest Sequence')
-        plt.title('Longest Sequence Per Second')
-        path = os.path.join(os.getcwd() , "outputs")
-        saveto = os.path.join(path, "eda","longest_seq.png")
-        plt.savefig(saveto)
+    l1 = df[df['loss'] == 200]
+    l2 = df[df['loss'] == 20000]
+    byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
+    byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
+    plt.figure(figsize = (15,10))
+    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "200")
+    plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "20000")
+    plt.legend(title = "Packet Loss", loc="upper right")
+    plt.xlabel('Seconds')
+    plt.ylabel('Longest Sequence')
+    plt.title('Longest Sequence Per Second')
+    path = os.path.join(os.getcwd() , "outputs")
+    saveto = os.path.join(path, "eda","longest_seq.png")
+    plt.savefig(saveto)
 
 def plot_correlation_matrix(cond, df):
     unseen = ''

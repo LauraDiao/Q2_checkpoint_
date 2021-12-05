@@ -49,15 +49,13 @@ def main(targets):
         
         print("Testing on seen data: ")
         test_mse(test_seen, combs)
-        best = best_performance(test_seen)
-        print("Performance for seen data: ", "\n", best, "\n")
-                
+        best_performance(test_seen)
+                        
     if "inference" in targets: 
         print("Testing on unseen data: ")
         test_mse(test_unseen, combs)
-        best2 = best_performance(test_unseen)
-        print("Performance for unseen data: ", "\n", best2, "\n")
-    
+        best_performance(test_unseen)
+            
     if "test" in targets: 
         """ runs all targets on sample data"""
         gen(test_seen, **transform_config)
@@ -68,14 +66,12 @@ def main(targets):
         
         print("Testing on seen data: ")
         test_mse(test_seen, combs)
-        best = best_performance(test_seen)
-        print("Performance for seen data: ", "\n", best, "\n")
-
+        best_performance(test_seen)
+        
         print("Testing on unseen data: ")
         test_mse(test_unseen, combs)
-        best2 = best_performance(test_unseen)
-        print("Performance for unseen data: ", "\n", best2, "\n")
-
+        best_performance(test_unseen)
+        
     if 'all' in targets: 
         """ runs all targets on all data"""
         gen(test_seen, **all_config)
@@ -86,13 +82,11 @@ def main(targets):
         
         print("Testing on seen data: ")
         test_mse(test_seen, combs)
-        best = best_performance(test_seen)
-        print("Performance for seen data: ", "\n", best, "\n")
-
+        best_performance(test_seen)
+        
         print("Testing on unseen data: ")
         test_mse(test_unseen, combs)
-        best2 = best_performance(test_unseen)
-        print("Performance for unseen data: ", "\n", best2, "\n")
+        best_performance(test_unseen)
         
 
 if __name__ == '__main__':
