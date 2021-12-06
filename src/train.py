@@ -22,6 +22,7 @@ def test_feat(cond, df, cols, p, df_u):
     # col is feauture comb
     # p is for loss or latency
     # 1: loss  # 2 : latency
+    #print(df.columns)
     X = df[cols]
     X2 = df_u[cols]
 
@@ -30,7 +31,7 @@ def test_feat(cond, df, cols, p, df_u):
         y2 = df_u.loss
     if p == 2: 
         y = df.latency
-        y2 = df_u.loss
+        y2 = df_u.latency
         
     # randomly split into train and test sets, test set is 80% of data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
@@ -70,7 +71,9 @@ def test_feat(cond, df, cols, p, df_u):
 
 
 def getAllCombinations(object_list):
-    lst = ['total_bytes', 'max_bytes', 'proto', '1->2Bytes','2->1Bytes', '1->2Pkts', '2->1Pkts', 'total_pkts', 'loss']
+    lst =  ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
+                ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
+                ,'total_pkt_sizes']
     uniq_objs = set(lst)
     combinations = []
     for obj in uniq_objs:

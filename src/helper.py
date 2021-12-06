@@ -42,8 +42,9 @@ def longest_seq(aList):
 
 def agg10(t_df):
     #print(t_df.columns)
-    indexcol = ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes','1->2Pkts','2->1Pkts',
-                'total_pkts', 'loss', 'latency']
+    indexcol = ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
+                ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
+                ,'total_pkt_sizes', 'loss', 'latency']
     df = pd.DataFrame([t_df[:10]['total_bytes'].mean(),
                        t_df[:10]['max_bytes'].std(), 
                        t_df[:10]['Proto'].value_counts().idxmax(), # most frequent protocol
@@ -52,11 +53,17 @@ def agg10(t_df):
                        t_df[:10]['1->2Pkts'].mean(),
                        t_df[:10]['2->1Pkts'].mean(),
                        t_df[:10]['total_pkts'].mean(),
-                       t_df.loss.unique()[0],
+                        t_df[:10]['number_ms'].mean(),
+                        t_df[:10]['pkt_ratio'].mean(),
+                        t_df[:10]['time_spread'].mean(),
+                        t_df[:10]['pkt sum'].mean(),
+                        t_df[:10][ 'longest_seq'].mean(),
+                        t_df[:10][ 'total_pkt_sizes'].mean(),
+                        t_df.loss.unique()[0],
                        t_df.latency.unique()[0]],
                       index = indexcol).T
     
-    for i in range(10, t_df.shape[0],10):
+    for i in range(10, t_df.shape[0],16):
         df = pd.concat([df, pd.DataFrame([t_df[:10]['total_bytes'].mean(),
                                            t_df[:10]['max_bytes'].std(), 
                                            t_df[:10]['Proto'].value_counts().idxmax(), # most frequent protocol
@@ -65,8 +72,13 @@ def agg10(t_df):
                                            t_df[:10]['1->2Pkts'].mean(),
                                            t_df[:10]['2->1Pkts'].mean(),
                                            t_df[:10]['total_pkts'].mean(),
-                                           t_df.loss.unique()[0],
-                                           t_df.latency.unique()[0]],
+                                            t_df[:10]['number_ms'].mean(),
+                                            t_df[:10]['pkt_ratio'].mean(),
+                                            t_df[:10]['time_spread'].mean(),
+                                            t_df[:10]['pkt sum'].mean(),
+                                            t_df[:10][ 'longest_seq'].mean(),
+                                            t_df[:10][ 'total_pkt_sizes'].mean(),t_df.loss.unique()[0],
+                                            t_df.latency.unique()[0]],
                                         index = indexcol).T]
                                         ,ignore_index=True)
     return df
@@ -89,7 +101,7 @@ def time(dataframe):
 
 def main2(temp_df):
     transformed = temp_df #time(temp_df)
-    label = 'latency'
+    label = 'loss'
 
     # print(transformed.columns)
     s =[ 'Second', label]

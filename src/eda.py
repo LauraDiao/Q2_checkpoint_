@@ -118,7 +118,7 @@ def plot_main4(cond, df_1, l1, df_2, l2, picname):
 
     tp_sum_agg2, tb_agg2, tp_agg2 = main2(df_2)
 
-    label = 'latency'
+    label = 'loss'
   
     fig, axes = plt.subplots(3, 2,figsize=(18, 10))#, sharex=True)
     #print()
