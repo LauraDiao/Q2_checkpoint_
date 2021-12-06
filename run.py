@@ -43,17 +43,23 @@ def main(targets):
     if 'train' in targets:
         "trains tests in this target"
         gen(test_seen, **transform_config)
-        gen(test_unseen,**transform_config)
-        
-        combs = getAllCombinations(**columns)
+                
+        comb1 = getAllCombinations(1)
+        comb2 = getAllCombinations(2)
         
         print("Testing on seen data: ")
-        test_mse(test_seen, combs)
+        test_mse(test_seen, comb1, comb2)
         best_performance(test_seen)
                         
     if "inference" in targets: 
+        gen(test_unseen, **transform_config)
+        gen(test_unseen,**transform_config)
+        
+        comb1 = getAllCombinations(1)
+        comb2 = getAllCombinations(2)
+        
         print("Testing on unseen data: ")
-        test_mse(test_unseen, combs)
+        test_mse(test_unseen, comb1, comb2)
         best_performance(test_unseen)
             
     if "test" in targets: 
@@ -61,15 +67,16 @@ def main(targets):
         gen(test_seen, **transform_config)
         gen(test_unseen, **transform_config)
         main_eda(test_seen, **eda_config)
-
-        combs = getAllCombinations(**columns)
+        
+        comb1 = getAllCombinations(1)
+        comb2 = getAllCombinations(2)
         
         print("Testing on seen data: ")
-        test_mse(test_seen, combs)
+        test_mse(test_seen, comb1, comb2)
         best_performance(test_seen)
         
         print("Testing on unseen data: ")
-        test_mse(test_unseen, combs)
+        test_mse(test_unseen, comb1, comb2)
         best_performance(test_unseen)
         
     if 'all' in targets: 
@@ -78,14 +85,15 @@ def main(targets):
         gen(test_unseen, **all_config)
         main_eda(test_seen, **eda_config)
 
-        combs = getAllCombinations(**columns)
+        comb1 = getAllCombinations(1)
+        comb2 = getAllCombinations(2)
         
         print("Testing on seen data: ")
-        test_mse(test_seen, combs)
+        test_mse(test_seen, comb1, comb2)
         best_performance(test_seen)
         
         print("Testing on unseen data: ")
-        test_mse(test_unseen, combs)
+        test_mse(test_unseen, comb1, comb2)
         best_performance(test_unseen)
         
 

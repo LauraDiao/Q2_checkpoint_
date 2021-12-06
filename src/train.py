@@ -70,10 +70,16 @@ def test_feat(cond, df, cols, p, df_u):
     return [acc1, acc2, acc3, acc4 ]
 
 
-def getAllCombinations(object_list):
+def getAllCombinations( cond_):
     lst =  ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
                 ,'total_pkt_sizes']
+    lst1 = ["max bytes", "longest_seq", "total_bytes"]
+    lst2 = ["total_pkts", "number_ms", "byte_ratio"]
+    if cond_ == 1:
+        lst = lst1
+    if cond_ == 2:
+        lst = lst2 
     uniq_objs = set(lst)
     combinations = []
     for obj in uniq_objs:
@@ -83,7 +89,7 @@ def getAllCombinations(object_list):
     print("all combinations generated")
     return combinations
 
-def test_mse(cond, all_comb):
+def test_mse(cond, all_comb1, all_comb2):
     unseen = ''
     if cond =='unseen': 
         unseen = 'unseen'
@@ -92,11 +98,19 @@ def test_mse(cond, all_comb):
     filedir = os.path.join(os.getcwd(), "outputs", "combined_t_latency.csv")
     
     df = pd.read_csv(filedir)
-    all_comb2 = pd.Series(all_comb).apply(lambda x: list(x))
+    all_comb1 = pd.Series(all_comb1).apply(lambda x: list(x))
+    all_comb1 = pd.Series(all_comb2).apply(lambda x: list(x))
     dt = []
     rf = []
     et = []
     pca = []
+    for i in all_comb1:
+        acc_loss = test_feat(cond, df, i, 1, df_unseen)
+        dt.append(acc_loss[0])
+        rf.append(acc_loss[1])
+        et.append(acc_loss[2])
+        pca.append(acc_loss[3])
+
     dt2 = []
     rf2 = []
     et2 = []
@@ -104,25 +118,20 @@ def test_mse(cond, all_comb):
     for i in all_comb2:
         # 1 = loss
         # 2 = latency
-        acc_loss = test_feat(cond, df, i, 1, df_unseen)
         acc_latency = test_feat(cond, df, i, 2, df_unseen)
         #print(accs)
-        dt.append(acc_loss[0])
-        rf.append(acc_loss[1])
-        et.append(acc_loss[2])
-        pca.append(acc_loss[3])
-        
         dt2.append(acc_latency[0])
         rf2.append(acc_latency[1])
         et2.append(acc_latency[2])
         pca2.append(acc_latency[3])        
     
-    dict1 = pd.DataFrame({'feat': all_comb, 'dt': dt, 'rf': rf, 'et': et, 'pca': pca})
-    dict2 = pd.DataFrame({'feat2': all_comb, 'dt2': dt2, 'rf2': rf2, 'et2': et2, 'pca2': pca2})
+    dict1 = pd.DataFrame({'feat': all_comb1, 'dt': dt, 'rf': rf, 'et': et, 'pca': pca})
+    dict2 = pd.DataFrame({'feat2': all_comb2, 'dt2': dt2, 'rf2': rf2, 'et2': et2, 'pca2': pca2})
     
-    feat_df = pd.concat([dict1, dict2], axis=1).drop(['feat2'], axis=1)
+    #feat_df = pd.concat([dict1, dict2], axis=1).drop(['feat2'], axis=1)
     path = os.path.join(os.getcwd() , "outputs")
-    feat_df.to_csv(os.path.join(path, unseen + "feat_df.csv"), index = False)
+    dict1.to_csv(os.path.join(path, unseen + "feat_df1.csv"), index = False)
+    dict2.to_csv(os.path.join(path, unseen + "feat_df2.csv"), index = False)
     
     # return feat_df
 
@@ -130,15 +139,25 @@ def best_performance(cond):
     unseen = ''
     if cond == 'unseen': 
         unseen = 'unseen'
-    print("finding best performance")
-    filedir = os.path.join(os.getcwd(), "outputs", unseen + "feat_df.csv")
-    df = pd.read_csv(filedir)
-    print("Performance sorted from lowest to highest")
-    sorted = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = True)
-    print(sorted[:5])
-    print("Performance sorted from highest to lowest")
-    sorted_2 = df.sort_values(by=['dt', 'rf', 'et', 'pca','dt2', 'rf2', 'et2', 'pca2'], ascending = False)
-    print(sorted_2[:5])
+    #print("finding best loss performance")
+    filedir1 = os.path.join(os.getcwd(), "outputs", unseen + "feat_df1.csv")
+    df1 = pd.read_csv(filedir1)
+    print( "\n")
+    print("Loss Performance sorted from lowest to highest", "\n")
+    print(df1.sort_values(by=['dt', 'rf', 'et', 'pca'], ascending = True)[:5], "\n")
+    #print("Loss Performance sorted from highest to lowest")
+    #print(df1.sort_values(by=['dt', 'rf', 'et', 'pca'], ascending = False)[:5])
+    
+
+    #print("finding best latency performance")
+    filedir2 = os.path.join(os.getcwd(), "outputs", unseen + "feat_df2.csv")
+    df2 = pd.read_csv(filedir2)
+    print( "\n")
+    print("Latency Performance sorted from lowest to highest", "\n")
+    print(df2.sort_values(by=['dt2', 'rf2', 'et2', 'pca2'], ascending = True)[:5], "\n")
+    #print("Latency Performance sorted from highest to lowest")
+    #print(df2.sort_values(by=['dt2', 'rf2', 'et2', 'pca2'], ascending = False)[:5])
+    
     #combined.to_csv("combined_latency.csv")
     # sorted.to_csv(os.path.join(path, "sorted_df.csv"), index = False)
 

@@ -44,7 +44,7 @@ def agg10(t_df):
     #print(t_df.columns)
     indexcol = ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
-                ,'total_pkt_sizes', 'loss', 'latency']
+                ,'total_pkt_sizes','byte_ratio', 'loss', 'latency']
     df = pd.DataFrame([t_df[:10]['total_bytes'].mean(),
                        t_df[:10]['max_bytes'].std(), 
                        t_df[:10]['Proto'].value_counts().idxmax(), # most frequent protocol
@@ -59,11 +59,12 @@ def agg10(t_df):
                         t_df[:10]['pkt sum'].mean(),
                         t_df[:10][ 'longest_seq'].mean(),
                         t_df[:10][ 'total_pkt_sizes'].mean(),
+                        t_df['byte_ratio'].mean(),
                         t_df.loss.unique()[0],
                        t_df.latency.unique()[0]],
                       index = indexcol).T
     
-    for i in range(10, t_df.shape[0],16):
+    for i in range(10, t_df.shape[0],17):
         df = pd.concat([df, pd.DataFrame([t_df[:10]['total_bytes'].mean(),
                                            t_df[:10]['max_bytes'].std(), 
                                            t_df[:10]['Proto'].value_counts().idxmax(), # most frequent protocol
@@ -77,7 +78,9 @@ def agg10(t_df):
                                             t_df[:10]['time_spread'].mean(),
                                             t_df[:10]['pkt sum'].mean(),
                                             t_df[:10][ 'longest_seq'].mean(),
-                                            t_df[:10][ 'total_pkt_sizes'].mean(),t_df.loss.unique()[0],
+                                            t_df[:10][ 'total_pkt_sizes'].mean(),
+                                            t_df['byte_ratio'].mean(),
+                                            t_df.loss.unique()[0],
                                             t_df.latency.unique()[0]],
                                         index = indexcol).T]
                                         ,ignore_index=True)
@@ -135,6 +138,7 @@ def genfeat(df):
     df['total_pkt_sizes'] = df.packet_sizes.apply(lambda x: sum(x))
     df['pkt_ratio'] = df.total_pkt_sizes / df.total_pkts
     df['time_spread'] = df.packet_times.apply(lambda x: x[-1] - x[0])
+    df['byte_ratio'] = df.total_bytes / df.total_pkts
     # print("max bytes generated")
     return tdf        
 
