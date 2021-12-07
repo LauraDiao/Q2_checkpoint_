@@ -33,16 +33,20 @@ def main(targets):
 
     if 'data' in targets:
         """generating feat from unseen and seen data"""
+        print("transforming seen data")
         gen(test_seen, **transform_config)
+        print("transforming unseen data")
         gen(test_unseen, **transform_config)
 
     if 'eda' in targets:  
+        print("transforming seen data")
         gen(test_seen, **transform_config)
         main_eda(test_seen, **eda_config)
         print("EDA saved to outputs/eda/ folder")
 
     if 'train' in targets:
         "trains tests in this target"
+        print("transforming seen data")
         gen(test_seen, **transform_config)
                 
         comb1 = getAllCombinations(1)
@@ -53,8 +57,10 @@ def main(targets):
         best_performance(test_seen)
                         
     if "inference" in targets: 
+        print("transforming seen data")
+        gen(test_seen, **transform_config)
+        print("transforming unseen data")
         gen(test_unseen, **transform_config)
-        gen(test_unseen,**transform_config)
         
         comb1 = getAllCombinations(1)
         comb2 = getAllCombinations(2)
@@ -65,10 +71,13 @@ def main(targets):
             
     if "test" in targets: 
         """ runs all targets on sample data"""
+        print("transforming seen data")
         gen(test_seen, **transform_config)
+        print("transforming unseen data")
         gen(test_unseen, **transform_config)
         main_eda(test_seen, **eda_config)
         print("EDA saved to outputs/eda/ folder")
+        
         comb1 = getAllCombinations(1)
         comb2 = getAllCombinations(2)
         
@@ -82,9 +91,12 @@ def main(targets):
         
     if 'all' in targets: 
         """ runs all targets on all data"""
+        print("transforming seen data")
         gen(test_seen, **all_config)
+        print("transforming unseen data")
         gen(test_unseen, **all_config)
         main_eda(test_seen, **eda_config)
+        print("EDA saved to outputs/eda/ folder")
 
         comb1 = getAllCombinations(1)
         comb2 = getAllCombinations(2)
