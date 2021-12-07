@@ -39,6 +39,7 @@ def main(targets):
     if 'eda' in targets:  
         gen(test_seen, **transform_config)
         main_eda(test_seen, **eda_config)
+        print("EDA saved to outputs/eda/ folder")
 
     if 'train' in targets:
         "trains tests in this target"
@@ -67,7 +68,7 @@ def main(targets):
         gen(test_seen, **transform_config)
         gen(test_unseen, **transform_config)
         main_eda(test_seen, **eda_config)
-        
+        print("EDA saved to outputs/eda/ folder")
         comb1 = getAllCombinations(1)
         comb2 = getAllCombinations(2)
         

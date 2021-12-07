@@ -74,7 +74,7 @@ def getAllCombinations( cond_):
     lst =  ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
                 ,'total_pkt_sizes']
-    lst1 = ["max bytes", "longest_seq", "total_bytes"]
+    lst1 = ["max_bytes", "longest_seq", "total_bytes"]
     lst2 = ["total_pkts", "number_ms", "byte_ratio"]
     if cond_ == 1:
         lst = lst1
@@ -99,7 +99,7 @@ def test_mse(cond, all_comb1, all_comb2):
     
     df = pd.read_csv(filedir)
     all_comb1 = pd.Series(all_comb1).apply(lambda x: list(x))
-    all_comb1 = pd.Series(all_comb2).apply(lambda x: list(x))
+    all_comb2 = pd.Series(all_comb2).apply(lambda x: list(x))
     dt = []
     rf = []
     et = []
