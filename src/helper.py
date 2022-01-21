@@ -1,23 +1,24 @@
 import numpy as np
+import json
+import sys
+import pandas as pd
+import os
+import glob
+import re
 import matplotlib.pyplot as plt
+import seaborn as sns
+from os import listdir
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.datasets import load_digits
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import ShuffleSplit
-import pandas as pd
-import os
-import glob
-import re
-import matplotlib.pyplot as plt 
 from sklearn.model_selection import train_test_split
-import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
-from eda_helper import *
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -38,7 +39,6 @@ def longest_seq(aList):
         if actualCount > maxCount:
             maxCount = actualCount
     return maxCount
-
 
 def agg10(t_df):
     #print(t_df.columns)
@@ -114,9 +114,9 @@ def main2(temp_df):
     
     b_agg = transformed.groupby(s)['total_bytes'].agg(['count', 'sum']).reset_index()
     
-    p_agg =  transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
+#     p_agg =  transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
     # print("all aggregations made")
-    return [p_sum_agg, b_agg, p_agg]
+    return [p_sum_agg, b_agg]#, p_agg]
 
 def genfeat(df): 
     tdf = df
@@ -142,4 +142,13 @@ def genfeat(df):
     # print("max bytes generated")
     return tdf        
 
-
+def max_bytes(x,y):
+    maxbytes = pd.DataFrame([x,y]).T.groupby(0).sum().max().values[0]
+    return maxbytes
+## Function to return accuraucy based on 10% difference 
+def accuracy(a,b):
+    scale = a*.1
+    if b <= a + scale and b >= a -scale:
+        return 1
+    else:
+        return 0

@@ -1,7 +1,7 @@
 {
-    "lst": [20, 270],
-    "filen1": "combined_subset_latency.csv",
-    "filen2": "combined_t_latency.csv",
-    "filen3": "combined_all_latency.csv"
+    "lst": [20, 300],
+    "filen1": "combined_subset_6068.csv",
+    "filen2": "combined_t.csv",
+    "filen3": "combined_all.csv"
 
 }

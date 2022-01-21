@@ -1,45 +1,28 @@
-from helper import *
-
+import numpy as np
+import json
+import sys
 import pandas as pd
 import os
 import glob
 import re
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+import seaborn as sns
+from os import listdir
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.datasets import load_digits
+from sklearn.model_selection import learning_curve
+from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import train_test_split
-import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
-import seaborn as sns
-
-from eda_helper import *
 
 import warnings
 warnings.filterwarnings("ignore")
 
-
-def main_eda(cond, lst, filen1, filen2, filen3):
-    unseen = ''
-    if cond =='unseen': 
-        unseen = 'unseen'
-    
-    fpath1 = os.path.join(os.getcwd() , "outputs", unseen + filen1)
-    df_1 = pd.read_csv(fpath1)
-    fpath2 = os.path.join(os.getcwd() , "outputs", unseen + filen2)
-    df_2 = pd.read_csv(fpath2)
-    fpath3 = os.path.join(os.getcwd() , "outputs", unseen + filen3)
-    df_3 = pd.read_csv(fpath3)
-    
-    plottogether(cond, lst, df_1, filen1.strip(".csv")) # trends over subset
-    plottogether(cond, lst, df_3, filen3.strip(".csv")) # trends over entire data
-    plotloss(cond, df_2)
-
-    plot_correlation_matrix(cond, df_2) # correlation matrix
-    plotlongest(df_3, cond)
-    # below makes rest of visualizations
-    plotbytes(df_3)
 
 def plotbytes(df):
     # series over loss
@@ -47,12 +30,12 @@ def plotbytes(df):
     # series over latency
     lst_lat = ['number_ms', 'total_pkts']
     for i in lst_loss: 
-        l1 = df[df['loss'] == 200]
+        l1 = df[df['loss'] == 2000]
         l2 = df[df['loss'] == 20000]
         byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'loss']]
         byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'loss']]
         plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "200")
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "2000")
         plt.plot(byte_agg2['Second'], byte_agg2[i], label = "20000")
         plt.legend(title = "Packet Loss", loc="upper right")
         plt.xlabel('Seconds')
@@ -63,12 +46,12 @@ def plotbytes(df):
         plt.savefig(saveto)
     for i in lst_lat:
         l1 = df[df['latency'] == 20]
-        l2 = df[df['latency'] == 420]
+        l2 = df[df['latency'] == 300]
         byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'latency']]
         byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'latency']]
         plt.figure(figsize = (15,10))
         plt.plot(byte_agg1['Second'], byte_agg1[i], label = "20")
-        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "420")
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "300")
         plt.legend(title = "Packet Loss", loc="upper right")
         plt.xlabel('Seconds')
         plt.ylabel(i.replace("_", '').capitalize())
@@ -79,12 +62,12 @@ def plotbytes(df):
     return
 
 def plotlongest(df, cond):
-    l1 = df[df['loss'] == 200]
+    l1 = df[df['loss'] == 2000]
     l2 = df[df['loss'] == 20000]
     byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
     byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
     plt.figure(figsize = (15,10))
-    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "200")
+    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "2000")
     plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "20000")
     plt.legend(title = "Packet Loss", loc="upper right")
     plt.xlabel('Seconds')
@@ -114,13 +97,13 @@ def plot_main4(cond, df_1, l1, df_2, l2, picname):
         unseen = 'unseen'
     #separating all of the aggregates for each loss
 
-    tp_sum_agg, tb_agg, tp_agg = main2(df_1)
+    tp_sum_agg, tb_agg  = main2(df_1) #tp_agg
 
-    tp_sum_agg2, tb_agg2, tp_agg2 = main2(df_2)
+    tp_sum_agg2, tb_agg2 = main2(df_2) # tp_agg2 
 
     label = 'loss'
   
-    fig, axes = plt.subplots(3, 2,figsize=(18, 10))#, sharex=True)
+    fig, axes = plt.subplots(2, 2,figsize=(18, 10))#, sharex=True)
     #print()
     sns.lineplot(ax=axes[0, 0], x = 'Second', y = 'sum', data = tp_sum_agg, hue = label)
     axes[0, 0].set_title("Packets Per Second over latency for run " + l1)
@@ -132,14 +115,14 @@ def plot_main4(cond, df_1, l1, df_2, l2, picname):
     sns.lineplot(ax=axes[1, 1], x = 'Second', y = 'sum', hue = label , data = tb_agg2)
     axes[1, 1].set_title("Bytes over packet latency for run " + l2)
 
-    sns.lineplot(ax=axes[2, 0], x = 'Second', y = 'sum', hue = label , data = tp_agg)
-    axes[2, 0].set_title("Pkts over packet loss for run " + l1)
-    sns.lineplot(ax=axes[2, 1], x = 'Second', y = 'sum', hue = label , data = tp_agg2)
-    axes[2, 1].set_title("Pkts over packet loss for run " + l2)
+#     sns.lineplot(ax=axes[2, 0], x = 'Second', y = 'sum', hue = label , data = tp_agg)
+#     axes[2, 0].set_title("Pkts over packet loss for run " + l1)
+#     sns.lineplot(ax=axes[2, 1], x = 'Second', y = 'sum', hue = label , data = tp_agg2)
+#     axes[2, 1].set_title("Pkts over packet loss for run " + l2)
     plt.subplots_adjust(hspace = 0.8)
     #savefig
     path = os.path.join(os.getcwd() , "outputs")
-    saveto = os.path.join(path, "eda", unseen + "latency_trends_" + picname + ".png")
+    saveto = os.path.join(path, "eda", unseen + "latency_trends_c" + picname + ".png")
     fig.savefig(saveto)
     print("end of main4")
 
@@ -149,10 +132,13 @@ def plottogether(cond, lst, df_e, picname):
         unseen = 'unseen'
     leftrun = lst[0]
     rightrun = lst[1]
-    values = df_e['iteration'].unique()
+    ll = 'latency'
+    values = df_e[ll].unique()
     # print(values)
-    subset1 = df_e[df_e['iteration'] == leftrun]
-    subset2 = df_e[df_e['iteration'] == rightrun]
+    subset1 = df_e[df_e[ll] == leftrun]
+    subset1_2 = df_e[(df_e['loss'] >= 200) & (df_e['loss'] <= 10000)]
+    subset2 = df_e[df_e[ll] == rightrun]
+    subset2_2 = df_e[(df_e['loss'] >= 200) & (df_e['loss'] <= 10000)]
     # print(subset1.shape)
     # print(subset2.shape)
     plot_main4(cond, subset1, str(leftrun), subset2, str(rightrun), picname)
@@ -172,7 +158,7 @@ def plot_learning_curve(
         source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
     """
     if axes is None:
-        _, axes = plt.subplots(1, 3, figsize=(20, 5))
+        _, axes = plt.subplots(1, 3, figsize=(5, 3))
 
     axes[0].set_title(title)
     if ylim is not None:
@@ -252,7 +238,7 @@ def plotloss(cond, df):
     unseen = ''
     if cond =='unseen': 
         unseen = 'unseen'
-    fig, axes = plt.subplots(3, 3, figsize=(10, 15))
+    fig, axes = plt.subplots(3, 4, figsize=(15, 15))
 
     X = df.drop(['latency'], axis=1)
     y = df.latency
@@ -281,6 +267,14 @@ def plotloss(cond, df):
     estimator = ExtraTreesRegressor(n_estimators=10)
     plot_learning_curve(
         estimator, title, X, y, axes=axes[:, 2], ylim=(0.7, 1.01), cv=cv, n_jobs=4
+    )
+    
+    title = r"Learning Curves (GradientBoost)"
+    # SVC is more expensive so we do a lower number of CV iterations:
+    cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+    estimator = GradientBoostingRegressor(random_state=0)
+    plot_learning_curve(
+        estimator, title, X, y, axes=axes[:, 3], ylim=(0.7, 1.01), cv=cv, n_jobs=4
     )
 
     #plt.show()
