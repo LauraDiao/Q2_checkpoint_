@@ -27,19 +27,19 @@ warnings.filterwarnings("ignore")
 
 from helper import *
 
-def plotbytes(df):
+def plotbytes(df, loss1, loss2, lat1, lat2):
     # series over loss
     lst_loss = ['total_bytes', 'max_bytes']
     # series over latency
     lst_lat = ['number_ms', 'total_pkts']
     for i in lst_loss: 
-        l1 = df[df['loss'] == 2000]
-        l2 = df[df['loss'] == 20000]
+        l1 = df[df['loss'] == loss1]
+        l2 = df[df['loss'] == loss2]
         byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'loss']]
         byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'loss']]
         plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "2000")
-        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "20000")
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = str(loss1))
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = str(loss2))
         plt.legend(title = "Packet Loss", loc="upper right")
         plt.xlabel('Seconds')
         plt.ylabel(i.replace("_", '').capitalize())
@@ -48,13 +48,13 @@ def plotbytes(df):
         saveto = os.path.join(path, "eda", i + ".png")
         plt.savefig(saveto)
     for i in lst_lat:
-        l1 = df[df['latency'] == 20]
-        l2 = df[df['latency'] == 300]
+        l1 = df[df['latency'] == lat1]
+        l2 = df[df['latency'] == lat2]
         byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', i,'latency']]
         byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', i,'latency']]
         plt.figure(figsize = (15,10))
-        plt.plot(byte_agg1['Second'], byte_agg1[i], label = "20")
-        plt.plot(byte_agg2['Second'], byte_agg2[i], label = "300")
+        plt.plot(byte_agg1['Second'], byte_agg1[i], label = str(lat1))
+        plt.plot(byte_agg2['Second'], byte_agg2[i], label = str(lat2))
         plt.legend(title = "Packet Loss", loc="upper right")
         plt.xlabel('Seconds')
         plt.ylabel(i.replace("_", '').capitalize())
@@ -64,14 +64,14 @@ def plotbytes(df):
         plt.savefig(saveto)
     return
 
-def plotlongest(df, cond):
-    l1 = df[df['loss'] == 2000]
-    l2 = df[df['loss'] == 20000]
+def plotlongest(df, cond, loss1, loss2):
+    l1 = df[df['loss'] == loss1]
+    l2 = df[df['loss'] == loss2]
     byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
     byte_agg2 = l2.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
     plt.figure(figsize = (15,10))
-    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = "2000")
-    plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = "20000")
+    plt.plot(byte_agg1['Second'], byte_agg1['longest_seq'], label = str(loss1))
+    plt.plot(byte_agg2['Second'], byte_agg2['longest_seq'], label = str(loss2))
     plt.legend(title = "Packet Loss", loc="upper right")
     plt.xlabel('Seconds')
     plt.ylabel('Longest Sequence')
@@ -139,9 +139,9 @@ def plottogether(cond, lst, df_e, picname):
     values = df_e[ll].unique()
     # print(values)
     subset1 = df_e[df_e[ll] == leftrun]
-    subset1_2 = df_e[(df_e['loss'] >= 200) & (df_e['loss'] <= 10000)]
+    #subset1_2 = df_e[(df_e['loss'] >= 200) & (df_e['loss'] <= 10000)]
     subset2 = df_e[df_e[ll] == rightrun]
-    subset2_2 = df_e[(df_e['loss'] >= 200) & (df_e['loss'] <= 10000)]
+    #subset2_2 = df_e[(df_e['loss'] >= 200) & (df_e['loss'] <= 10000)]
     # print(subset1.shape)
     # print(subset2.shape)
     plot_main4(cond, subset1, str(leftrun), subset2, str(rightrun), picname)
