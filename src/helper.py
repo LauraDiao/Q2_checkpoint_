@@ -19,6 +19,8 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
+from sklearn.datasets import make_hastie_10_2
+from sklearn.ensemble import GradientBoostingRegressor
 
 import warnings
 warnings.filterwarnings("ignore")

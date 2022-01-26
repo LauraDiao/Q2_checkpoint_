@@ -1,7 +1,6 @@
 {
-    "lst": [20, 300],
     "filen1": "combined_subset_6068.csv",
-    "filen2": "combined_t.csv",
+    "filen2": "combined_transform.csv",
     "filen3": "combined_all.csv"
 
 }
