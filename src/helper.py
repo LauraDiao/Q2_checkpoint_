@@ -8,19 +8,6 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 from os import listdir
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
-from sklearn.datasets import load_digits
-from sklearn.model_selection import learning_curve
-from sklearn.model_selection import ShuffleSplit
-from sklearn.model_selection import train_test_split
-from sklearn.decomposition import PCA
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.datasets import make_hastie_10_2
-from sklearn.ensemble import GradientBoostingRegressor
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -30,7 +17,7 @@ def return_int(x):
     return [int(i) for i in x.split(';')[:-1]]
 
 def longest_seq(aList):
-    "find longest sequence in packet dirs "
+    "find longest sequence in packet dirs"
     maxCount = 1
     actualCount = 1
     for i in range(len(aList)-1):
@@ -69,22 +56,22 @@ def agg10(t_df):
     
     for i in range(20, t_df.shape[0],10):
         df = pd.concat([df, pd.DataFrame([t_df[i-10:i]['total_bytes'].mean(),
-                                           t_df[i-10:i]['max_bytes'].std(), 
-                                           t_df[i-10:i]['Proto'].value_counts().idxmax(), # most frequent protocol
-                                           t_df[i-10:i]['1->2Bytes'].mean(),
-                                           t_df[i-10:i]['2->1Bytes'].mean(),
-                                           t_df[i-10:i]['1->2Pkts'].mean(),
-                                           t_df[i-10:i]['2->1Pkts'].mean(),
-                                           t_df[i-10:i]['total_pkts'].mean(),
-                                            t_df[i-10:i]['number_ms'].mean(),
-                                            t_df[i-10:i]['pkt_ratio'].mean(),
-                                            t_df[i-10:i]['time_spread'].mean(),
-                                            t_df[i-10:i]['pkt sum'].mean(),
-                                            t_df[i-10:i][ 'longest_seq'].mean(),
-                                            t_df[i-10:i][ 'total_pkt_sizes'].mean(),
-                                            t_df['byte_ratio'].mean(),
-                                            t_df.loss.unique()[0],
-                                            t_df.latency.unique()[0]],
+                                          t_df[i-10:i]['max_bytes'].std(), 
+                                          t_df[i-10:i]['Proto'].value_counts().idxmax(), # most frequent protocol
+                                          t_df[i-10:i]['1->2Bytes'].mean(),
+                                          t_df[i-10:i]['2->1Bytes'].mean(),
+                                          t_df[i-10:i]['1->2Pkts'].mean(),
+                                          t_df[i-10:i]['2->1Pkts'].mean(),
+                                          t_df[i-10:i]['total_pkts'].mean(),
+                                          t_df[i-10:i]['number_ms'].mean(),
+                                          t_df[i-10:i]['pkt_ratio'].mean(),
+                                          t_df[i-10:i]['time_spread'].mean(),
+                                          t_df[i-10:i]['pkt sum'].mean(),
+                                          t_df[i-10:i][ 'longest_seq'].mean(),
+                                          t_df[i-10:i][ 'total_pkt_sizes'].mean(),
+                                          t_df['byte_ratio'].mean(),
+                                          t_df.loss.unique()[0],
+                                          t_df.latency.unique()[0]],
                                         index = indexcol).T]
                                         ,ignore_index=True)
     return df
