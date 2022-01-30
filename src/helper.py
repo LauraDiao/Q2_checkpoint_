@@ -33,8 +33,9 @@ def agg10(t_df):
     '''takes dataframe with features from output of genfeat function and aggregates them in 10 second intervals'''
     #print(t_df.columns)
     indexcol = ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
-                ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
-                ,'total_pkt_sizes','byte_ratio', 'loss', 'latency']
+                ,'1->2Pkts','2->1Pkts','total_pkts', 'total_pkts_min', 'total_pkts_max', 'number_ms', 'pkt_ratio','time_spread', 
+                'time_spread_min','time_spread_max','pkt sum','longest_seq',
+                'longest_seq_min', 'longest_seq_max','total_pkt_sizes','byte_ratio', 'mean_tdelta', 'max_tdelta', 'loss', 'latency']
     df = pd.DataFrame([t_df[:10]['total_bytes'].mean(),
                        t_df[:10]['max_bytes'].std(), 
                        t_df[:10]['Proto'].value_counts().idxmax(), # most frequent protocol
@@ -43,19 +44,28 @@ def agg10(t_df):
                        t_df[:10]['1->2Pkts'].mean(),
                        t_df[:10]['2->1Pkts'].mean(),
                        t_df[:10]['total_pkts'].mean(),
+                       t_df[:10]['total_pkts'].min(),
+                       t_df[:10]['total_pkts'].max(),
                         t_df[:10]['number_ms'].mean(),
                         t_df[:10]['pkt_ratio'].mean(),
                         t_df[:10]['time_spread'].mean(),
+                        t_df[:10]['time_spread'].min(),
+                        t_df[:10]['time_spread'].max(),
                         t_df[:10]['pkt sum'].mean(),
-                        t_df[:10][ 'longest_seq'].mean(),
+                        t_df[:10]['longest_seq'].mean(),
+                        t_df[:10]['longest_seq'].min(),
+                        t_df[:10]['longest_seq'].max(),
                         t_df[:10][ 'total_pkt_sizes'].mean(),
                         t_df['byte_ratio'].mean(),
+                        t_df[:10]['mean_tdelta'].mean(),
+                        t_df[:10]['max_tdelta'].mean(),
                         t_df.loss.unique()[0],
                        t_df.latency.unique()[0]],
                       index = indexcol).T
     
     for i in range(20, t_df.shape[0],10):
         df = pd.concat([df, pd.DataFrame([t_df[i-10:i]['total_bytes'].mean(),
+<<<<<<< Updated upstream
                                           t_df[i-10:i]['max_bytes'].std(), 
                                           t_df[i-10:i]['Proto'].value_counts().idxmax(), # most frequent protocol
                                           t_df[i-10:i]['1->2Bytes'].mean(),
@@ -72,6 +82,32 @@ def agg10(t_df):
                                           t_df['byte_ratio'].mean(),
                                           t_df.loss.unique()[0],
                                           t_df.latency.unique()[0]],
+=======
+                                           t_df[i-10:i]['max_bytes'].std(), 
+                                           t_df[i-10:i]['Proto'].value_counts().idxmax(), # most frequent protocol
+                                           t_df[i-10:i]['1->2Bytes'].mean(),
+                                           t_df[i-10:i]['2->1Bytes'].mean(),
+                                           t_df[i-10:i]['1->2Pkts'].mean(),
+                                           t_df[i-10:i]['2->1Pkts'].mean(),
+                                           t_df[i-10:i]['total_pkts'].mean(),
+                                           t_df[i-10:i]['total_pkts'].min(),
+                                           t_df[i-10:i]['total_pkts'].max(),                       
+                                            t_df[i-10:i]['number_ms'].mean(),
+                                            t_df[i-10:i]['pkt_ratio'].mean(),
+                                            t_df[i-10:i]['time_spread'].mean(),
+                                            t_df[i-10:i]['time_spread'].min(),
+                                            t_df[i-10:i]['time_spread'].max(),
+                                            t_df[i-10:i]['pkt sum'].mean(),
+                                            t_df[i-10:i][ 'longest_seq'].mean(),
+                                            t_df[i-10:i][ 'longest_seq'].min(),
+                                            t_df[i-10:i][ 'longest_seq'].max(),
+                                            t_df[i-10:i][ 'total_pkt_sizes'].mean(),
+                                            t_df['byte_ratio'].mean(),
+                                            t_df[i-10:i]['mean_tdelta'].mean(),
+                                            t_df[i-10:i]['max_tdelta'].mean(),
+                                            t_df.loss.unique()[0],
+                                            t_df.latency.unique()[0]],
+>>>>>>> Stashed changes
                                         index = indexcol).T]
                                         ,ignore_index=True)
     return df
