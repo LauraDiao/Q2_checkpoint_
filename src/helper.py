@@ -106,6 +106,7 @@ def time(dataframe):
 
 
 def main2(temp_df):
+    '''helper function that aggregates the input by count and sum for plot_main_4'''
     transformed = temp_df #time(temp_df)
     label = 'loss'
 
@@ -142,8 +143,32 @@ def genfeat(df):
     df['pkt_ratio'] = df.total_pkt_sizes / df.total_pkts
     df['time_spread'] = df.packet_times.apply(lambda x: x[-1] - x[0])
     df['byte_ratio'] = df.total_bytes / df.total_pkts
+    df['mean_tdelta'] = df['packet_times'].str.split(';').apply(mean_diff)
+    df['max_tdelta'] = df['packet_times'].str.split(';').apply(max_diff)
+
     # print("max bytes generated")
-    return tdf        
+    return tdf   
+
+def mean_diff(lst):
+    '''
+    returns mean difference in a column, 
+    meant to be used on transformed 'packet_times' column
+    >>> df['packet_times'].str.split(';').apply(mean_diff)
+    '''
+    lst = np.array(list(filter(None, lst))) # takes out empty strings
+    mn = np.mean([int(t) - int(s) for s, t in zip(lst, lst[1:])]) #TODO use numpy diff if needed
+    return 0 if np.isnan(mn) else mn
+def max_diff(lst):
+    '''
+    returns max difference in a column, 
+    meant to be used on transformed 'packet_times' column
+    >>> df['packet_times'].str.split(';').apply(max_diff)
+    '''
+    lst = np.array(list(filter(None, lst))).astype(np.int64)
+    # mn = max([int(t) - int(s) for s, t in zip(lst, lst[1:])]) if len(lst) > 0 else np.nan
+    diffs = np.diff(lst)
+    mn = max(diffs) if len(diffs) > 0 else np.nan # length of diffs might be zero
+    return 0 if np.isnan(mn) else mn     
 
 def max_bytes(x,y):
     maxbytes = pd.DataFrame([x,y]).T.groupby(0).sum().max().values[0]
