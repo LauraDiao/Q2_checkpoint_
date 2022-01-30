@@ -8,19 +8,6 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 from os import listdir
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
-from sklearn.datasets import load_digits
-from sklearn.model_selection import learning_curve
-from sklearn.model_selection import ShuffleSplit
-from sklearn.model_selection import train_test_split
-from sklearn.decomposition import PCA
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.datasets import make_hastie_10_2
-from sklearn.ensemble import GradientBoostingRegressor
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -30,7 +17,7 @@ def return_int(x):
     return [int(i) for i in x.split(';')[:-1]]
 
 def longest_seq(aList):
-    "find longest sequence in packet dirs "
+    "find longest sequence in packet dirs"
     maxCount = 1
     actualCount = 1
     for i in range(len(aList)-1):
@@ -43,6 +30,7 @@ def longest_seq(aList):
     return maxCount
 
 def agg10(t_df):
+    '''takes dataframe with features from output of genfeat function and aggregates them in 10 second intervals'''
     #print(t_df.columns)
     indexcol = ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
@@ -66,24 +54,24 @@ def agg10(t_df):
                        t_df.latency.unique()[0]],
                       index = indexcol).T
     
-    for i in range(10, t_df.shape[0],17):
-        df = pd.concat([df, pd.DataFrame([t_df[:10]['total_bytes'].mean(),
-                                           t_df[:10]['max_bytes'].std(), 
-                                           t_df[:10]['Proto'].value_counts().idxmax(), # most frequent protocol
-                                           t_df[:10]['1->2Bytes'].mean(),
-                                           t_df[:10]['2->1Bytes'].mean(),
-                                           t_df[:10]['1->2Pkts'].mean(),
-                                           t_df[:10]['2->1Pkts'].mean(),
-                                           t_df[:10]['total_pkts'].mean(),
-                                            t_df[:10]['number_ms'].mean(),
-                                            t_df[:10]['pkt_ratio'].mean(),
-                                            t_df[:10]['time_spread'].mean(),
-                                            t_df[:10]['pkt sum'].mean(),
-                                            t_df[:10][ 'longest_seq'].mean(),
-                                            t_df[:10][ 'total_pkt_sizes'].mean(),
-                                            t_df['byte_ratio'].mean(),
-                                            t_df.loss.unique()[0],
-                                            t_df.latency.unique()[0]],
+    for i in range(20, t_df.shape[0],10):
+        df = pd.concat([df, pd.DataFrame([t_df[i-10:i]['total_bytes'].mean(),
+                                          t_df[i-10:i]['max_bytes'].std(), 
+                                          t_df[i-10:i]['Proto'].value_counts().idxmax(), # most frequent protocol
+                                          t_df[i-10:i]['1->2Bytes'].mean(),
+                                          t_df[i-10:i]['2->1Bytes'].mean(),
+                                          t_df[i-10:i]['1->2Pkts'].mean(),
+                                          t_df[i-10:i]['2->1Pkts'].mean(),
+                                          t_df[i-10:i]['total_pkts'].mean(),
+                                          t_df[i-10:i]['number_ms'].mean(),
+                                          t_df[i-10:i]['pkt_ratio'].mean(),
+                                          t_df[i-10:i]['time_spread'].mean(),
+                                          t_df[i-10:i]['pkt sum'].mean(),
+                                          t_df[i-10:i][ 'longest_seq'].mean(),
+                                          t_df[i-10:i][ 'total_pkt_sizes'].mean(),
+                                          t_df['byte_ratio'].mean(),
+                                          t_df.loss.unique()[0],
+                                          t_df.latency.unique()[0]],
                                         index = indexcol).T]
                                         ,ignore_index=True)
     return df
@@ -105,6 +93,7 @@ def time(dataframe):
 
 
 def main2(temp_df):
+    '''helper function that aggregates the input by count and sum for plot_main_4'''
     transformed = temp_df #time(temp_df)
     label = 'loss'
 
@@ -141,8 +130,32 @@ def genfeat(df):
     df['pkt_ratio'] = df.total_pkt_sizes / df.total_pkts
     df['time_spread'] = df.packet_times.apply(lambda x: x[-1] - x[0])
     df['byte_ratio'] = df.total_bytes / df.total_pkts
+    df['mean_tdelta'] = df['packet_times'].str.split(';').apply(mean_diff)
+    df['max_tdelta'] = df['packet_times'].str.split(';').apply(max_diff)
+
     # print("max bytes generated")
-    return tdf        
+    return tdf   
+
+def mean_diff(lst):
+    '''
+    returns mean difference in a column, 
+    meant to be used on transformed 'packet_times' column
+    >>> df['packet_times'].str.split(';').apply(mean_diff)
+    '''
+    lst = np.array(list(filter(None, lst))) # takes out empty strings
+    mn = np.mean([int(t) - int(s) for s, t in zip(lst, lst[1:])]) #TODO use numpy diff if needed
+    return 0 if np.isnan(mn) else mn
+def max_diff(lst):
+    '''
+    returns max difference in a column, 
+    meant to be used on transformed 'packet_times' column
+    >>> df['packet_times'].str.split(';').apply(max_diff)
+    '''
+    lst = np.array(list(filter(None, lst))).astype(np.int64)
+    # mn = max([int(t) - int(s) for s, t in zip(lst, lst[1:])]) if len(lst) > 0 else np.nan
+    diffs = np.diff(lst)
+    mn = max(diffs) if len(diffs) > 0 else np.nan # length of diffs might be zero
+    return 0 if np.isnan(mn) else mn     
 
 def max_bytes(x,y):
     maxbytes = pd.DataFrame([x,y]).T.groupby(0).sum().max().values[0]
