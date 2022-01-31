@@ -37,6 +37,7 @@ def readfilerun(run_, output_dir):
     '''reads files in one directory, cleans, labels and then outputs them to other directory'''
     names = listdir(run_) # all filenames in data
     daneruns = [x for x in names if not 'losslog' in x]
+    daneruns = [ filename for filename in daneruns if filename.endswith(".csv" ) ]
     # daneruns = ['data/20220116T055105_20-100-true-20-100-iperf.csv', 'data/20220116T055942_20-250-true-20-250-iperf.csv']
     losslogs = [x for x in names if 'losslog' in x]
     
