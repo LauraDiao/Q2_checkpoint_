@@ -10,7 +10,6 @@ def readfilerun_simple(filename, losslog_dir='data/raw/train_r'):
     '''does what readfilerun does but to a single file, no directory iteration, dataframe output.'''
     
     run_labels = filename.split('_')[-1].split('-')[:-1]
-    print(run_labels)
     temp_label_str = '-'.join(run_labels) 
     losslog = f'{losslog_dir}/losslog-{temp_label_str}.csv' #losslog filename str
     
