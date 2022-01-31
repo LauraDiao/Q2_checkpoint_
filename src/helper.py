@@ -134,6 +134,10 @@ def genfeat(df):
     tdf['pkt sum'] = tdf['packet_sizes'].apply(lambda x: sum(x)) # summing packets
     tdf['packet_dirs'] = tdf['packet_dirs'].astype('str').apply(return_int) # converting to type int
     tdf['longest_seq'] = tdf['packet_dirs'].apply(longest_seq) # finding longest sequence
+    
+    tdf['mean_tdelta'] = tdf['packet_times'].str.split(';').apply(mean_diff)
+    tdf['max_tdelta'] = tdf['packet_times'].str.split(';').apply(max_diff)
+    
     tdf['packet_times'] = tdf['packet_times'].apply(return_int) # converting to int
     #tdf = onehot_(tdf)
     # def maxbyte(x):
@@ -141,15 +145,15 @@ def genfeat(df):
     #     return x
     # mx_byte = tdf[['packet_times', 'packet_sizes']].apply(maxbyte, axis =1) 
     # tdf['max_bytes'] = mx_byte
-    df['number_ms'] = df['packet_times'].apply(lambda x: pd.Series(x).nunique())
-    df['max_bytes'] = df.apply(lambda x: max_bytes(x['packet_times'],x['packet_sizes']),axis=1)
-    df['total_pkt_sizes'] = df.packet_sizes.apply(lambda x: sum(x))
-    df['pkt_ratio'] = df.total_pkt_sizes / df.total_pkts
-    df['time_spread'] = df.packet_times.apply(lambda x: x[-1] - x[0])
-    df['byte_ratio'] = df.total_bytes / df.total_pkts
-    df['mean_tdelta'] = df['packet_times'].str.split(';').apply(mean_diff)
-    df['max_tdelta'] = df['packet_times'].str.split(';').apply(max_diff)
-
+    tdf['number_ms'] = tdf['packet_times'].apply(lambda x: pd.Series(x).nunique())
+    tdf['max_bytes'] = tdf.apply(lambda x: max_bytes(x['packet_times'],x['packet_sizes']),axis=1)
+    tdf['total_pkt_sizes'] = tdf.packet_sizes.apply(lambda x: sum(x))
+    tdf['pkt_ratio'] = tdf.total_pkt_sizes / tdf.total_pkts
+    tdf['time_spread'] = tdf.packet_times.apply(lambda x: x[-1] - x[0])
+    tdf['byte_ratio'] = tdf.total_bytes / tdf.total_pkts
+    # tdf['mean_tdelta'] = tdf['packet_times'].apply(lambda x: mean_diff(str(x).split(';')))
+    # tdf['max_tdelta'] = tdf['packet_times'].apply(lambda x: max_diff(str(x).split(';')))
+    
     # print("max bytes generated")
     return tdf   
 
