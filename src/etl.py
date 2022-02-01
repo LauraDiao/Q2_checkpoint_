@@ -6,6 +6,7 @@ import pandas as pd
 import os
 from os import listdir
     
+from helper import *
 def readfilerun_simple(filename, losslog_dir='data/raw/train_r'):
     '''does what readfilerun does but to a single file, no directory iteration, dataframe output.'''
     
@@ -71,3 +72,60 @@ def readfilerun(run_, output_dir):
         #TODO future implementation of boolean flag for when the switch happens so we know when to use later lat/loss
         
         df.to_csv(f'{output_dir}/labeled_{temp_label_str}.csv') # save to temporary output directory: just merging takes a bit
+
+        return 
+
+def gen(cond , tempdir, subset):
+    '''Generates transformed output data aggregated in 3 files.'''
+    unseen = ""
+    if cond == 'seen': 
+        print("transforming seen data")
+    if cond == 'unseen': 
+        print("transforming un seen data")
+        unseen = "unseen"
+    
+    tempdatafiles = 'data/temp/' + tempdir # temporary data directory for training model
+    tempagg = 'data/temp' # temporary data directory for training model
+    
+    # path = os.path.join(os.getcwd() , "outputs", "gen_temp")
+    # path2 = os.path.join(os.getcwd() , "outputs")
+    fnames = [ filename for filename in listdir(tempdatafiles) if filename.endswith(".csv" ) ]
+    
+    data, datasubset, transformed  = [], [], []
+    for j in fnames:
+        loc = os.path.join(os.getcwd(), 'data', "temp/" + tempdir, j)
+        #print(loc)
+        df_cols = genfeat(pd.read_csv(loc))
+        
+        #data
+        time_scaled = time__(df_cols)
+        #print(time_scaled)
+        data.append(time_scaled)
+        
+        #subset
+        df_mid = time_scaled.iloc[60:60+subset]
+        datasubset.append(df_mid)
+
+        #transformed
+        f_df = agg10(df_cols)
+        transformed.append(f_df)
+        
+    # makes paths
+    path = os.path.join(os.getcwd() , "outputs", "gen_temp")
+    path2 = os.path.join(os.getcwd() , "outputs")
+    
+    list_to_csv(data, os.path.join(path2, unseen + "combined_all.csv"))
+    print('combined_finished', sep=' ')
+    list_to_csv(datasubset, os.path.join(path2, unseen + "combined_subset_6068.csv"))
+    print('combined_all_finished', sep=' ')
+    list_to_csv(transformed, os.path.join(path2, unseen +  "combined_transform.csv"))
+    print('transformed_finished', sep=' ')
+    
+    return None
+
+def list_to_csv(lst, filepth):
+    '''takes list of pandas dataframes with similar column structure and outputs them to a single folder'''
+    lst[0].to_csv(filepth, index=False)
+    for i in range(1, len(lst)):
+        lst[i].to_csv(filepth, index=False, header=False, mode='a')
+    return
