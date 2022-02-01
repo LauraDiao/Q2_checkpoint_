@@ -29,6 +29,38 @@ def longest_seq(aList):
             maxCount = actualCount
     return maxCount
 
+def better_agg(t_df, interval=10):
+    
+    temp = t_df.copy()
+    temp['group'] = temp.index // interval
+    df = temp.groupby('group').agg({
+        'total_bytes': [pd.Series.mean],
+        'max_bytes': [np.mean, np.std],
+        'Proto': [pd.Series.mode],
+        '1->2Bytes': [np.mean],
+        '2->1Bytes': [np.mean],
+        '1->2Pkts': [np.mean],
+        '2->1Pkts': [np.mean],
+        'total_pkts': [np.mean, np.min, np.max],
+        'number_ms': [np.mean],
+        'pkt_ratio': [np.mean],
+        'time_spread': [np.mean, np.min, np.max],
+        'pkt sum': [np.mean],
+        'longest_seq': [np.mean, np.min, np.max],
+        'total_pkt_sizes': [np.mean],
+        'byte_ratio': [np.mean],
+        'mean_tdelta': [np.mean, np.min, np.max],
+        'max_tdelta': [np.mean, np.min, np.max],
+        'latency': [pd.Series.mode],
+        'loss': [pd.Series.mode],
+        'later_latency': [pd.Series.mode],
+        'later_loss': [pd.Series.mode],
+    })
+    df.columns = ["_".join(a) for a in df.columns.to_flat_index()] # flattens MultiIndex
+    df.columns = [a[:-5] if ('mode' in a) or ('mean' in a) else a for a in df.columns] # simplifies names of certain features
+    return df
+    
+
 def agg10(t_df):
     '''takes dataframe with features from output of genfeat function and aggregates them in 10 second intervals'''
     #print(t_df.columns)

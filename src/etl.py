@@ -107,7 +107,8 @@ def gen(cond , tempdir, subset):
         datasubset.append(df_mid)
 
         #transformed
-        f_df = agg10(df_cols)
+        # f_df = agg10(df_cols)
+        f_df = better_agg(df_cols)
         transformed.append(f_df)
         
     # makes paths
