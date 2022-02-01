@@ -43,7 +43,7 @@ def readfilerun(run_, output_dir):
     losslogs = [x for x in names if 'losslog' in x]
     
     for run in daneruns: # run = a single csv from danerun inside the run_
-        # print(run) #for debug
+        #print(run) #for debug
         
         run_labels = run.split('_')[-1].split('-')[:-1]
         
@@ -73,7 +73,7 @@ def readfilerun(run_, output_dir):
         
         df.to_csv(f'{output_dir}/labeled_{temp_label_str}.csv') # save to temporary output directory: just merging takes a bit
 
-        return 
+    return 
 
 def gen(cond , tempdir, subset):
     '''Generates transformed output data aggregated in 3 files.'''
