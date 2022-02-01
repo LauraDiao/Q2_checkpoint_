@@ -27,6 +27,29 @@ warnings.filterwarnings("ignore")
 
 from helper import *
 
+def main_eda(cond, lst, filen1, filen2, filen3):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
+    
+    fpath1 = os.path.join(os.getcwd() , "outputs", unseen + filen1)
+    df_1 = pd.read_csv(fpath1)
+    fpath2 = os.path.join(os.getcwd() , "outputs", unseen + filen2)
+    df_2 = pd.read_csv(fpath2)
+    fpath3 = os.path.join(os.getcwd() , "outputs", unseen + filen3)
+    df_3 = pd.read_csv(fpath3)
+    
+    plottogether(cond, lst, df_1, filen1.strip(".csv")) # trends over subset
+    plottogether(cond, lst, df_3, filen3.strip(".csv")) # trends over entire data
+    plotloss(cond, df_2)
+
+    plot_correlation_matrix(cond, df_2) # correlation matrix
+    plotlongest(df_3, cond, 2000, 14000)
+    # below makes rest of visualizations
+    plotbytes(df_3, 2000, 14000, 200, 300)
+    #plot_detailed_bytes()
+
+
 def plotbytes(df, loss1, loss2, lat1, lat2):
     # series over loss
     lst_loss = ['total_bytes', 'max_bytes']
@@ -285,3 +308,21 @@ def plotloss(cond, df):
     path = os.path.join(os.getcwd() , "outputs")
     saveto = os.path.join(path, "eda", unseen + "learning_curves.png")
     fig.savefig(saveto)
+    
+    def plot_detailed_bytes(df, col='1->2Bytes', rollsec=10):
+        rollcolor = '#6c2b6d'
+        detailcolor = '#e98d6b'
+
+        ax = plt.figure(figsize=(18,8))
+        df[col].plot(title=f'{col}/s Rate', color=detailcolor)
+        df[col].rolling(rollsec).mean().bfill().plot(color=rollcolor)
+        plt.axvline(x=180, color='r')
+        for i in df[df['event'] == 'drop'].index:
+            plt.axvline(x=i, color='y', alpha=.45)
+        custom_lines = [Line2D([0], [0], color=detailcolor, lw=2),
+            Line2D([0], [0], color=rollcolor, lw=2),
+            Line2D([0], [0], color='y', lw=2, alpha=0.45),
+            Line2D([0], [0], color='r', lw=2)]
+        plt.legend(custom_lines, 
+                   [f'{col} per Second', f'{col} per Second ({rollsec}s rolling avg)', 'Packet drop', '180s Mark'], 
+                   loc='upper right', framealpha=1);

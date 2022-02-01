@@ -101,7 +101,7 @@ def onehot_(df):
     return temp_df
 
 
-def time(dataframe): 
+def time__(dataframe): 
     # scales seconds 
     mini = dataframe['Time'].min()
     temp1 = dataframe.assign(Second = lambda x: x['Time'] - mini)
