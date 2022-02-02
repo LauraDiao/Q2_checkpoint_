@@ -167,8 +167,8 @@ def getAllCombinations( cond_):
     lst =  ['total_bytes','max_bytes', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
                 ,'total_pkt_sizes', 'mean_tdelta', 'max_tdelta']# 'proto',
-    latency_lst = [ "byte_ratio", 'max_tdelta', 'pkt_ratio', 'time_spread_min', 'total_bytes', '2->1Pkts']
-    loss_lst = ['total_pkts', 'pkt sum', 'total_pkt_sizes', '2->1Bytes', 'total_pkts_max', 'number_ms', 'mean_tdelta'] 
+    latency_lst = ['byte_ratio', 'pkt_ratio', 'time_spread', 'total_bytes', '2->1Pkts']
+    loss_lst = ['total_pkts', 'total_pkt_sizes', '2->1Bytes', 'number_ms', 'mean_tdelta', 'max_tdelta'] 
     
     if cond_ == 1:
         lst = loss_lst
@@ -203,4 +203,5 @@ def feat_impt(labl):
     print(f'mse: {acc3}, r2: {etree.score(X_test, y_test)}')
     feat_imp = pd.Series(index=[x for x in indexcol if x in df.columns], 
               data=etree.feature_importances_).sort_values(ascending=False)
-    feat_imp
+    print(feat_imp)
+    return 

@@ -32,8 +32,7 @@ def longest_seq(aList):
 def better_agg(t_df, interval=10):
     
     temp = t_df.copy()
-    temp['group'] = temp.index // interval
-    df = temp.groupby('group').agg({
+    df = temp.groupby(temp.index // interval).agg({
         'total_bytes': [pd.Series.mean],
         'max_bytes': [np.mean, np.std],
         'Proto': [pd.Series.mode],
@@ -57,7 +56,7 @@ def better_agg(t_df, interval=10):
         'later_loss': [pd.Series.mode],
     })
     df.columns = ["_".join(a) for a in df.columns.to_flat_index()] # flattens MultiIndex
-    df.columns = [a[:-5] if ('mode' in a) or ('mean' in a) else a for a in df.columns] # simplifies names of certain features
+    df.columns = [a[:-5] if ('mode' in a[-5:]) or ('mean' in a[-5:]) else a for a in df.columns] # simplifies names of certain features
     return df
     
 
