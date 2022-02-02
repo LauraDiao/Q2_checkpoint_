@@ -150,16 +150,32 @@ def best_performance(cond):
     df1 = pd.read_csv(filedir1)
     df1_round = df1.round(decimals = 3)
     print( "\n")
-    print("Loss Performance sorted from highest to lowest metric: r2", "\n")
-    print(df1_round.sort_values(by=['dt', 'rf', 'et', 'gbc'], ascending = False)[:5], "\n")
+    #print("Loss Performance sorted from highest to lowest metric: r2", "\n")
+    print("Best performance for Loss Models")
+    dt_p1 = df1_round.sort_values(by=['dt'], ascending = False)
+    print(dt_p1[:2], '\n' )
+    dt_p2 = df1_round.sort_values(by=['rf'], ascending = False)
+    print(dt_p2[:2], '\n' )
+    dt_p3 = df1_round.sort_values(by=['et'], ascending = False)
+    print(dt_p3[:2], '\n' )
+    dt_p4 = df1_round.sort_values(by=['gbc'], ascending = False)
+    print(dt_p4[:2], '\n' )
     
     #print("finding best latency performance")
     filedir2 = os.path.join(os.getcwd(), "outputs", unseen + "feat_df2.csv")
     df2 = pd.read_csv(filedir2)
     df2_round = df2.round(decimals = 3)
-    print( "\n")
-    print("Latency Performance sorted from highest to lowest metric: r2", "\n")
-    print(df2_round.sort_values(by=['dt2', 'rf2', 'et2', 'gbc2'], ascending = False)[:5], "\n")
+    #print("Latency Performance sorted from highest to lowest metric: r2", "\n")
+    #print(df2_round.sort_values(by=['dt2', 'rf2', 'et2', 'gbc2'], ascending = False)[:5], "\n")
+    print("Best performance for Latency Models")
+    dt2_p1 = df2_round.sort_values(by=['dt2'], ascending = False)
+    print(dt2_p1[:2], '\n' )
+    dt2_p2 = df2_round.sort_values(by=['rf2'], ascending = False)
+    print(dt2_p2[:2], '\n' )
+    dt2_p3 = df2_round.sort_values(by=['et2'], ascending = False)
+    print(dt2_p3[:2], '\n' )
+    dt2_p4 = df2_round.sort_values(by=['gbc2'], ascending = False)
+    print(dt2_p4[:2], '\n' )
 
 
 
@@ -167,8 +183,8 @@ def getAllCombinations( cond_):
     lst =  ['total_bytes','max_bytes', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts','number_ms', 'pkt_ratio','time_spread', 'pkt sum','longest_seq'
                 ,'total_pkt_sizes', 'mean_tdelta', 'max_tdelta']# 'proto',
-    latency_lst = [ "byte_ratio", 'max_tdelta', 'pkt_ratio', 'time_spread_min', 'total_bytes', '2->1Pkts']
-    loss_lst = ['total_pkts', 'pkt sum', 'total_pkt_sizes', '2->1Bytes', 'total_pkts_max', 'number_ms', 'mean_tdelta'] 
+    latency_lst = [ "byte_ratio", 'max_tdelta', 'pkt_ratio', 'time_spread_amin', 'total_bytes', '2->1Pkts']
+    loss_lst = ['total_pkts', 'pkt sum', 'total_pkt_sizes', '2->1Bytes',  'number_ms', 'mean_tdelta', 'total_pkts_amax'] # ,
     
     if cond_ == 1:
         lst = loss_lst
@@ -199,6 +215,35 @@ def feat_impt(labl):
 
     y_pred3 = etree.predict(X_test)
     acc3= mean_squared_error(y_test, y_pred3)
+
+    print(f'mse: {acc3}, r2: {etree.score(X_test, y_test)}')
+    feat_imp = pd.Series(index=[x for x in indexcol if x in df.columns], 
+              data=etree.feature_importances_).sort_values(ascending=False)
+    feat_imp
+    
+def rolling_window(labl):
+    # rolling wdinow
+#     Pd rolling window
+#     Aggregate last 10 rows
+#     Other idea: shift row and calc percent difference
+
+    label_col = labl
+    
+    df = pd.read_csv(os.path.join(os.getcwd() , "outputs", 'combined_transform.csv'))
+
+    indexcol = ['total_bytes','max_bytes','2->1Bytes','2->1Pkts','total_pkts', 'total_pkts_min', 'total_pkts_max', 'number_ms', 'pkt_ratio','time_spread', 'time_spread_min','time_spread_max','pkt sum','longest_seq', 'longest_seq_min', 'longest_seq_max','total_pkt_sizes','byte_ratio', 'mean_tdelta', 'max_tdelta']
+    len(indexcol)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        df[[x for x in indexcol if x in df.columns]], df[label_col])
+    # print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+    etree = ExtraTreesRegressor(n_estimators=400, n_jobs=4)
+    etreeft = etree.fit(X_train,y_train)
+
+    y_pred3 = etree.predict(X_test)
+    acc3= mean_squared_error(y_test, y_pred3)
+    roll = pd.Series(y_pred3).rolling(2).mean() # roling over past 20 seconds
+    print roll
 
     print(f'mse: {acc3}, r2: {etree.score(X_test, y_test)}')
     feat_imp = pd.Series(index=[x for x in indexcol if x in df.columns], 

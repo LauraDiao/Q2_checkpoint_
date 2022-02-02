@@ -44,17 +44,20 @@ def main_eda(cond, lst, filen1, filen2, filen3):
     plotloss(cond, df_2)
 
     plot_correlation_matrix(cond, df_2) # correlation matrix
-    plotlongest(df_3, cond, 2000, 14000)
+    plotlongest(df_3, cond, 6000, 14000)
     # below makes rest of visualizations
-    plotbytes(df_3, 2000, 14000, 200, 300)
+    plotbytes(df_3, 6000, 14000, 200, 300, cond)
     #plot_detailed_bytes()
 
 
-def plotbytes(df, loss1, loss2, lat1, lat2):
+def plotbytes(df, loss1, loss2, lat1, lat2, cond):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     # series over loss
-    lst_loss = ['total_bytes', 'max_bytes']
+    lst_loss = ['total_bytes', 'max_bytes', 'mean_tdelta']
     # series over latency
-    lst_lat = ['number_ms', 'total_pkts']
+    lst_lat = ['number_ms', 'total_pkts', 'max_tdelta']
     for i in lst_loss: 
         l1 = df[df['loss'] == loss1]
         l2 = df[df['loss'] == loss2]
@@ -68,7 +71,7 @@ def plotbytes(df, loss1, loss2, lat1, lat2):
         plt.ylabel(i.replace("_", '').capitalize())
         plt.title(i.replace("_", '').capitalize() + ' Per Second')
         path = os.path.join(os.getcwd() , "outputs")
-        saveto = os.path.join(path, "eda", i + ".png")
+        saveto = os.path.join(path, "eda",unseen +  i + ".png")
         plt.savefig(saveto)
     for i in lst_lat:
         l1 = df[df['latency'] == lat1]
@@ -83,11 +86,14 @@ def plotbytes(df, loss1, loss2, lat1, lat2):
         plt.ylabel(i.replace("_", '').capitalize())
         plt.title(i.replace("_", '').capitalize() + ' Per Second')
         path = os.path.join(os.getcwd() , "outputs")
-        saveto = os.path.join(path, "eda", i + ".png")
+        saveto = os.path.join(path, "eda",unseen +   i + ".png")
         plt.savefig(saveto)
     return
 
 def plotlongest(df, cond, loss1, loss2):
+    unseen = ''
+    if cond =='unseen': 
+        unseen = 'unseen'
     l1 = df[df['loss'] == loss1]
     l2 = df[df['loss'] == loss2]
     byte_agg1 = l1.groupby('Second').sum().reset_index()[['Second', 'longest_seq','loss']]
@@ -100,7 +106,7 @@ def plotlongest(df, cond, loss1, loss2):
     plt.ylabel('Longest Sequence')
     plt.title('Longest Sequence Per Second')
     path = os.path.join(os.getcwd() , "outputs")
-    saveto = os.path.join(path, "eda","longest_seq.png")
+    saveto = os.path.join(path, "eda",unseen +  "longest_seq.png")
     plt.savefig(saveto)
 
 def plot_correlation_matrix(cond, df):
@@ -309,20 +315,20 @@ def plotloss(cond, df):
     saveto = os.path.join(path, "eda", unseen + "learning_curves.png")
     fig.savefig(saveto)
     
-    def plot_detailed_bytes(df, col='1->2Bytes', rollsec=10):
-        rollcolor = '#6c2b6d'
-        detailcolor = '#e98d6b'
+def plot_detailed_bytes(df, col='1->2Bytes', rollsec=10):
+    rollcolor = '#6c2b6d'
+    detailcolor = '#e98d6b'
 
-        ax = plt.figure(figsize=(18,8))
-        df[col].plot(title=f'{col}/s Rate', color=detailcolor)
-        df[col].rolling(rollsec).mean().bfill().plot(color=rollcolor)
-        plt.axvline(x=180, color='r')
-        for i in df[df['event'] == 'drop'].index:
-            plt.axvline(x=i, color='y', alpha=.45)
-        custom_lines = [Line2D([0], [0], color=detailcolor, lw=2),
-            Line2D([0], [0], color=rollcolor, lw=2),
-            Line2D([0], [0], color='y', lw=2, alpha=0.45),
-            Line2D([0], [0], color='r', lw=2)]
-        plt.legend(custom_lines, 
-                   [f'{col} per Second', f'{col} per Second ({rollsec}s rolling avg)', 'Packet drop', '180s Mark'], 
-                   loc='upper right', framealpha=1);
+    ax = plt.figure(figsize=(18,8))
+    df[col].plot(title=f'{col}/s Rate', color=detailcolor)
+    df[col].rolling(rollsec).mean().bfill().plot(color=rollcolor)
+    plt.axvline(x=180, color='r')
+    for i in df[df['event'] == 'drop'].index:
+        plt.axvline(x=i, color='y', alpha=.45)
+    custom_lines = [Line2D([0], [0], color=detailcolor, lw=2),
+        Line2D([0], [0], color=rollcolor, lw=2),
+        Line2D([0], [0], color='y', lw=2, alpha=0.45),
+        Line2D([0], [0], color='r', lw=2)]
+    plt.legend(custom_lines, 
+               [f'{col} per Second', f'{col} per Second ({rollsec}s rolling avg)', 'Packet drop', '180s Mark'], 
+               loc='upper right', framealpha=1);

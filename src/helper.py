@@ -198,6 +198,7 @@ def mean_diff(lst):
     lst = np.array(list(filter(None, lst))) # takes out empty strings
     mn = np.mean([int(t) - int(s) for s, t in zip(lst, lst[1:])]) #TODO use numpy diff if needed
     return 0 if np.isnan(mn) else mn
+
 def max_diff(lst):
     '''
     returns max difference in a column, 
