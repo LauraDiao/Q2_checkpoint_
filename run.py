@@ -44,6 +44,7 @@ from helper import *
 from eda import *
 from train import *
 from etl import *
+from make_dir import init_
 
 def main(targets):
     init_()

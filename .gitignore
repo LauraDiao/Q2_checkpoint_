@@ -4,3 +4,4 @@ outputs
 data/out/*.csv
 data/temp/tempdata_c*.csv
 data/temp/tempdata_r*.csv
+data/temp/tempdata_r/*
