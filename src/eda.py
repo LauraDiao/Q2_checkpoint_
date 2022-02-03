@@ -32,16 +32,16 @@ def main_eda(cond, lst, filen1, filen2, filen3):
     if cond =='unseen': 
         unseen = 'unseen'
     
-    fpath1 = os.path.join(os.getcwd() , "outputs", unseen + filen1)
+    fpath1 = os.path.join(os.getcwd() , "data/out", unseen + filen1)
     df_1 = pd.read_csv(fpath1)
-    fpath2 = os.path.join(os.getcwd() , "outputs", unseen + filen2)
+    fpath2 = os.path.join(os.getcwd() , "data/out", unseen + filen2)
     df_2 = pd.read_csv(fpath2)
-    fpath3 = os.path.join(os.getcwd() , "outputs", unseen + filen3)
+    fpath3 = os.path.join(os.getcwd() , "data/out", unseen + filen3)
     df_3 = pd.read_csv(fpath3)
     
     plottogether(cond, lst, df_1, filen1.strip(".csv")) # trends over subset
     plottogether(cond, lst, df_3, filen3.strip(".csv")) # trends over entire data
-    plotloss(cond, df_2)
+#     plotloss(cond, df_2)
 
     plot_correlation_matrix(cond, df_2) # correlation matrix
     plotlongest(df_3, cond, 6000, 14000)

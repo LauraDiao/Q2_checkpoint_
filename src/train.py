@@ -96,9 +96,9 @@ def test_mse(cond, all_comb1, all_comb2):
     unseen = ''
     if cond =='unseen': 
         unseen = 'unseen'
-    filedir_unseen = os.path.join(os.getcwd(), "outputs", unseen + "combined_transform.csv")
+    filedir_unseen = os.path.join(os.getcwd(), "data/out", unseen + "combined_transform.csv")
     df_unseen = pd.read_csv(filedir_unseen)
-    filedir = os.path.join(os.getcwd(), "outputs", "combined_transform.csv")
+    filedir = os.path.join(os.getcwd(), "data/out", "combined_transform.csv")
     df = pd.read_csv(filedir)
     
     all_comb1 = pd.Series(all_comb1).apply(lambda x: list(x))
@@ -152,12 +152,16 @@ def best_performance(cond):
     print( "\n")
     #print("Loss Performance sorted from highest to lowest metric: r2", "\n")
     print("Best performance for Loss Models")
+    print("Decision Tree", '\n')
     dt_p1 = df1_round.sort_values(by=['dt'], ascending = False)
     print(dt_p1[:2], '\n' )
+    print("Random Forest", '\n')
     dt_p2 = df1_round.sort_values(by=['rf'], ascending = False)
     print(dt_p2[:2], '\n' )
+    print("Extra Trees", '\n')
     dt_p3 = df1_round.sort_values(by=['et'], ascending = False)
     print(dt_p3[:2], '\n' )
+    print("Gradient Boost", '\n')
     dt_p4 = df1_round.sort_values(by=['gbc'], ascending = False)
     print(dt_p4[:2], '\n' )
     
@@ -168,12 +172,16 @@ def best_performance(cond):
     #print("Latency Performance sorted from highest to lowest metric: r2", "\n")
     #print(df2_round.sort_values(by=['dt2', 'rf2', 'et2', 'gbc2'], ascending = False)[:5], "\n")
     print("Best performance for Latency Models")
+    print("Decision Tree", '\n')
     dt2_p1 = df2_round.sort_values(by=['dt2'], ascending = False)
     print(dt2_p1[:2], '\n' )
+    print("Random Forest", '\n')
     dt2_p2 = df2_round.sort_values(by=['rf2'], ascending = False)
     print(dt2_p2[:2], '\n' )
+    print("Extra Trees", '\n')
     dt2_p3 = df2_round.sort_values(by=['et2'], ascending = False)
     print(dt2_p3[:2], '\n' )
+    print("Gradient Boost", '\n')
     dt2_p4 = df2_round.sort_values(by=['gbc2'], ascending = False)
     print(dt2_p4[:2], '\n' )
 
