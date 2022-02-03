@@ -112,8 +112,7 @@ def gen(cond , tempdir, subset):
         transformed.append(f_df)
         
     # makes paths
-    path = os.path.join(os.getcwd() , "outputs", "gen_temp")
-    path2 = os.path.join(os.getcwd() , "outputs")
+    path2 = os.path.join(os.getcwd() , "data", "out")
     
     list_to_csv(data, os.path.join(path2, unseen + "combined_all.csv"))
     print('combined_finished', sep=' ')
