@@ -1,5 +1,6 @@
 __pycache__
 .ipynb_checkpoints
-outputs/eda
-data/out
-data/temp
+outputs
+data/out/*.csv
+data/temp/tempdata_c*.csv
+data/temp/tempdata_r*.csv
