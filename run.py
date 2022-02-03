@@ -69,11 +69,7 @@ def main(targets):
 
     if 'eda' in targets:  
         # readfiledrun and gen for seen data, refer to data target
-        print('plotting seen data')
-        main_eda(test_seen, [200, 300], **eda_config)
-        print('plotting un seen data')
-        main_eda(test_unseen, [200, 300], **eda_config)
-        print("EDA saved to outputs/eda/ folder")
+        print('EDA generated in the train and inference targets')
 
     if 'train' in targets:
         "trains tests in this target"
@@ -87,6 +83,9 @@ def main(targets):
         test_mse(test_seen, comb1, comb2)
         best_performance(test_seen)
         
+        print('plotting seen data')
+        main_eda(test_seen, [200, 300], **eda_config)
+        print("EDA saved to outputs/eda/ folder")
 
     if "inference" in targets: 
         readfilerun('data/raw/train_c', 'data/temp/tempdata_c')
@@ -98,7 +97,11 @@ def main(targets):
         print("Testing on unseen data: ")
         test_mse(test_unseen, comb1, comb2)
         best_performance(test_unseen)
-            
+        
+        print('plotting un seen data')
+        main_eda(test_unseen, [200, 300], **eda_config)
+        print("EDA saved to outputs/eda/ folder")
+        
     if "test" in targets: 
         """ runs all targets on sample data"""
 
