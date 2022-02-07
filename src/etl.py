@@ -31,7 +31,6 @@ def readfilerun_simple(filename, losslog_dir='data/raw/train_r'):
     df['loss'] = int(run_labels[1])
     df['later_latency'] = int(run_labels[3])
     df['later_loss'] = int(run_labels[4])
-    df[]
     df['deterministic'] = bool(run_labels[2])
     return df
 
