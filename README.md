@@ -1,7 +1,7 @@
 # Final report code
 
-# transform.json: used for the test target
-# all.json: for user to modify
+## transform.json: used for the test target
+## all.json: for user to modify
 #     "runs": [1, 2, 5, 6], this corresponds to the (seen data) runs in the test directory of observed data to train/test the model on
 #    "unseen_runs": [3, 4], this corresponds to (unseen data) runs in the test directory that the model, trained on seen data, will be tested on the run folder
 #    "subset": 8 # relevant for the eda, a subset of 8 seconds to compare to visualizations generated on the whole dataset
