@@ -11,7 +11,7 @@ An in depth approach to detecting significant real-time shifts in network perfor
 
 2. Clone this branch of the repository
    ```
-   git clone https://github.com/Ben243/DSC180A_Q1/tree/justin_branch
+   git clone https://github.com/LauraDiao/Q2_checkpoint_
    ```
 
 3. Place all raw DANE csv files within the directory ```data/raw``` of this repository. If the directory has not been created, run the command ```run.py``` once to generate all relevant directories.
@@ -20,7 +20,7 @@ An in depth approach to detecting significant real-time shifts in network perfor
 
 ## To use this repository: 
 Each of these targets implements a core feature of the repository within ```run.py```. All code can be executed with the run.py according to various targets specified below. <br>
-Example call: ```python run.py data inference``
+Example call: ```python run.py data inference```
 ### Target List:
 - ```data```: generates features from unseen and seen data
 - ```eda```: Generates visualizations used in exploring which features to use for the model
