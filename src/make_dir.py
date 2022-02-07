@@ -1,45 +1,18 @@
-import numpy as np
-import json
-import sys
+import json,sys, os, glob, re, time 
+from os import listdir
+
 import pandas as pd
-import os
-import glob
-import re
-import time 
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from os import listdir
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
-from sklearn.datasets import load_digits
-from sklearn.model_selection import learning_curve
-from sklearn.model_selection import ShuffleSplit
-from sklearn.model_selection import train_test_split
-from sklearn.decomposition import PCA
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.datasets import make_hastie_10_2
-from sklearn.ensemble import GradientBoostingRegressor
 import warnings
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import make_scorer
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import make_scorer
 
 warnings.filterwarnings("ignore")
 
 def init_():
+    '''creates directories needed to run repo'''
     temp_path = "data/temp"
     temp_c_path = "data/temp/tempdata_c"
     temp_r_path = "data/temp/tempdata_r"

@@ -1,23 +1,16 @@
 import numpy as np
-import json
-import sys
 import pandas as pd
-import os
-import glob
-import re
-import matplotlib.pyplot as plt
-import seaborn as sns
 from os import listdir
 
 import warnings
 warnings.filterwarnings("ignore")
 
-# Data cleaning to turn columns into list of integers
 def return_int(x):
+    '''Data cleaning to turn semicolon-separated string columns into list of integers'''
     return [int(i) for i in x.split(';')[:-1]]
 
 def longest_seq(aList):
-    "find longest sequence in packet dirs"
+    '''find longest sequence in packet dirs'''
     maxCount = 1
     actualCount = 1
     for i in range(len(aList)-1):
@@ -30,9 +23,11 @@ def longest_seq(aList):
     return maxCount
 
 def better_agg(t_df, interval=10):
-    
+    '''rewritten aggregation function that takes in all the features from genfeat()
+    aggregates distributions of features and returns descriptive statistics for the interval specified
+    '''
     temp = t_df.copy()
-    df = temp.groupby(temp.index // interval).agg({
+    df = temp.groupby(temp.index // interval).agg({ # groups by intervals of rows. 
         'total_bytes': [pd.Series.mean],
         'max_bytes': [np.mean, np.std],
         'Proto': [pd.Series.mode],
@@ -61,8 +56,11 @@ def better_agg(t_df, interval=10):
     
 
 def agg10(t_df):
-    '''takes dataframe with features from output of genfeat function and aggregates them in 10 second intervals'''
-    #print(t_df.columns)
+    '''
+    Legacy code, left so code does not accidentally break
+    takes dataframe with features from output of genfeat function and aggregates them in 10 second intervals
+    '''
+
     indexcol = ['total_bytes','max_bytes','proto', "1->2Bytes",'2->1Bytes'
                 ,'1->2Pkts','2->1Pkts','total_pkts', 'total_pkts_min', 'total_pkts_max', 'number_ms', 'pkt_ratio','time_spread', 
                 'time_spread_min','time_spread_max','pkt sum','longest_seq',
@@ -124,14 +122,6 @@ def agg10(t_df):
                                         ,ignore_index=True)
     return df
 
-def onehot_(df): 
-    d_proto = pd.get_dummies(df['Proto']).rename(columns={6: "TCP", 58: "IPv6"})
-    d_p1 = pd.get_dummies(df['Port1'])
-    d_p2 = pd.get_dummies(df['Port2'])
-    temp_df = pd.concat([df, d_proto, d_p1, d_p2], axis=1)
-    return temp_df
-
-
 def time__(dataframe): 
     # scales seconds 
     mini = dataframe['Time'].min()
@@ -146,7 +136,7 @@ def main2(temp_df):
     label = 'loss'
 
     # print(transformed.columns)
-    s =[ 'Second', label]
+    s =['Second', label]
     
     p_sum_agg = transformed.groupby(s)['total_pkts'].agg(['count', 'sum']).reset_index()
     # print(p_sum_agg.columns)
@@ -158,6 +148,7 @@ def main2(temp_df):
     return [p_sum_agg, b_agg]#, p_agg]
 
 def genfeat(df): 
+    '''Generates derivative features that are later used for aggregation within the model.'''
     tdf = df
     tdf['total_bytes'] = tdf['1->2Bytes'] + tdf['2->1Bytes'] # combining bytes
     tdf['total_pkts'] = tdf['1->2Pkts'] + tdf['2->1Pkts'] # combining packets
@@ -166,25 +157,18 @@ def genfeat(df):
     tdf['packet_dirs'] = tdf['packet_dirs'].astype('str').apply(return_int) # converting to type int
     tdf['longest_seq'] = tdf['packet_dirs'].apply(longest_seq) # finding longest sequence
     
-    tdf['mean_tdelta'] = tdf['packet_times'].str.split(';').apply(mean_diff)
-    tdf['max_tdelta'] = tdf['packet_times'].str.split(';').apply(max_diff)
+    tdf['mean_tdelta'] = tdf['packet_times'].str.split(';').apply(mean_diff) # finding mean difference between time stamps
+    tdf['max_tdelta'] = tdf['packet_times'].str.split(';').apply(max_diff) # finding max difference between time stamps 
     
     tdf['packet_times'] = tdf['packet_times'].apply(return_int) # converting to int
-    #tdf = onehot_(tdf)
-    # def maxbyte(x):
-    #     x = pd.DataFrame([x[0],x[1]]).T.groupby(0).sum().max().values[0]
-    #     return x
-    # mx_byte = tdf[['packet_times', 'packet_sizes']].apply(maxbyte, axis =1) 
-    # tdf['max_bytes'] = mx_byte
+    
     tdf['number_ms'] = tdf['packet_times'].apply(lambda x: pd.Series(x).nunique())
     tdf['max_bytes'] = tdf.apply(lambda x: max_bytes(x['packet_times'],x['packet_sizes']),axis=1)
     tdf['total_pkt_sizes'] = tdf.packet_sizes.apply(lambda x: sum(x))
     tdf['pkt_ratio'] = tdf.total_pkt_sizes / tdf.total_pkts
     tdf['time_spread'] = tdf.packet_times.apply(lambda x: x[-1] - x[0])
     tdf['byte_ratio'] = tdf.total_bytes / tdf.total_pkts
-    # tdf['mean_tdelta'] = tdf['packet_times'].apply(lambda x: mean_diff(str(x).split(';')))
-    # tdf['max_tdelta'] = tdf['packet_times'].apply(lambda x: max_diff(str(x).split(';')))
-    
+
     # print("max bytes generated")
     return tdf   
 def mean_diff(lst):
@@ -210,12 +194,22 @@ def max_diff(lst):
     return 0 if np.isnan(mn) else mn     
 
 def max_bytes(x,y):
+    '''
+    gets the maximum sum of packets aggregated per millisecond recorded
+    warning: very computationally expensive!
+    '''
     maxbytes = pd.DataFrame([x,y]).T.groupby(0).sum().max().values[0]
     return maxbytes
-## Function to return accuraucy based on 10% difference 
+
 def accuracy(a,b):
+    '''Function to return accuracy based on 10% difference''' 
     scale = a*.1
     if b <= a + scale and b >= a -scale:
         return 1
     else:
         return 0
+    
+def emp_loss(df, window=25):
+    '''returns empirical loss over a window of time.'''
+    return (df['total_pkts'].rolling(window).sum() / 
+        df['event'].str.replace('switch', '').str.split(';').str.len().fillna(0).rolling(window).sum())

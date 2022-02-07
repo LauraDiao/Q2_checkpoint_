@@ -1,16 +1,10 @@
+import json,sys, os, glob, re, time
+from os import listdir
+ 
 import numpy as np
-import json
-import sys
 import pandas as pd
-import os
-import glob
-import re
 import matplotlib.pyplot as plt
 import seaborn as sns
-from os import listdir
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
-from sklearn.datasets import load_digits
 from sklearn.model_selection import learning_curve
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import train_test_split
@@ -19,13 +13,14 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.metrics import mean_squared_error
-from sklearn.datasets import make_hastie_10_2
 from sklearn.ensemble import GradientBoostingRegressor
+from matplotlib.lines import Line2D
 
 import warnings
 warnings.filterwarnings("ignore")
 
 from helper import *
+from etl import readfilerun_simple
 
 def main_eda(cond, lst, filen1, filen2, filen3):
     unseen = ''
@@ -47,8 +42,21 @@ def main_eda(cond, lst, filen1, filen2, filen3):
     plotlongest(df_3, cond, 6000, 14000)
     # below makes rest of visualizations
     plotbytes(df_3, 6000, 14000, 200, 300, cond)
-    #plot_detailed_bytes()
 
+def model_eda():
+    '''uses some unseen data to show model performance. assumes unseen data is alr run'''
+    tempdatac = 'data/temp/tempdata_c' # TODO PUT in other repo
+    data = listdir(tempdatac)
+    if len(data) == 0:
+        print('warning: no tempdata to work with for model_eda')
+        return
+    df = genfeat(pd.read_csv(os.path.join(tempdatac, data[0])))
+    
+    plot_detailed_bytes(df)
+
+    plot_model_predictions(df, label='loss')
+    plot_model_predictions(df, label='latency')
+    print('model predictions plotted')
 
 def plotbytes(df, loss1, loss2, lat1, lat2, cond):
     unseen = ''
@@ -332,3 +340,55 @@ def plot_detailed_bytes(df, col='1->2Bytes', rollsec=10):
     plt.legend(custom_lines, 
                [f'{col} per Second', f'{col} per Second ({rollsec}s rolling avg)', 'Packet drop', '180s Mark'], 
                loc='upper right', framealpha=1);
+    path = os.path.join(os.getcwd() , "outputs")
+    saveto = os.path.join(path, "eda",f'trendline_unseen.png')
+    plt.savefig(saveto)
+
+def plot_model_predictions(df, label='loss', windowsize=25, shift_time=180):
+    '''
+    requires a dataframe merged with with losslog data
+    plots model predictions with a shift time value you can set.
+    '''
+
+    df = df.copy()
+    if(label=='loss'): # latency features
+        indexcol = ['byte_ratio', 'pkt_ratio', 'time_spread', 'total_bytes', '2->1Pkts']
+    else: # loss features
+        indexcol = ['total_pkts', 'total_pkt_sizes', '2->1Bytes', 'number_ms', 'mean_tdelta', 'max_tdelta'] 
+        
+    ct = pd.read_csv('outputs/combined_transform.csv').rename(
+        {'mean_tdelta.1': 'mean_tdelta_amin', 'mean_tdelta.2':'mean_tdelta_amax'}, 
+        axis=1)
+    
+    X_train, X_test, y_train, y_test = train_test_split(ct[[x for x in indexcol if x in df.columns]], ct[label])
+    etree = RandomForestRegressor(n_estimators=100, n_jobs=4)
+    etreeft = etree.fit(X_train,y_train)
+
+    df['prediction'] = etree.predict(df[indexcol].rolling(10).mean().bfill()) # prediction
+
+    df[[label, f'later_{label}', 'prediction']].plot(
+        figsize=(14,6), title=f'Real Time Prediction on {label}', 
+        xlabel='Time (sec)', ylabel=label)
+    if (label=='loss'):
+        emp_loss(df, windowsize).plot()
+    plt.axvline(x=shift_time, color='r')
+    if(label=='loss'):
+        plt.legend([
+            f'Early {label} label', 
+            f'Later {label} label', 
+            'Prediction',
+            f'Empirical Loss (window {windowsize} sec)',
+            'Anomalous switch event'
+            ], loc='center left')
+    else:
+        plt.legend([
+            f'Early {label} label', 
+            f'Later {label} label', 
+            'Prediction',
+            'Anomalous switch event'
+            ], loc='center left')
+    for i in df[~df['event'].isnull()].index:
+        plt.axvline(x=i, color='y', alpha=.45)
+    path = os.path.join(os.getcwd() , "outputs")
+    saveto = os.path.join(path, "eda",f'{label}_model_preds.png')
+    plt.savefig(saveto)
